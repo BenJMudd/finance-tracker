@@ -150,11 +150,15 @@
     <ClCompile Include="src\DBFilter.cpp" />
     <ClCompile Include="src\DBHandler.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\View.cpp" />
+    <ClCompile Include="src\ViewController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DataViewer.h" />
     <ClInclude Include="include\DBFilter.h" />
     <ClInclude Include="include\DBHandler.h" />
+    <ClInclude Include="include\View.h" />
+    <ClInclude Include="include\ViewController.h" />
     <ClInclude Include="lib\sqlite3.h" />
     <ClInclude Include="lib\sqlite3ext.h" />
     <ClInclude Include="lib\SQLiteCpp\Assertion.h" />

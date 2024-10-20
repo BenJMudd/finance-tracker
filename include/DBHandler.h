@@ -9,40 +9,27 @@
 
 struct CategoryEntry {
   CategoryEntry(SQLite::Statement &res,
-                const std::vector<std::string> &catNames) {
-    std::string cat = res.getColumn(0).getString();
-    std::string subcat = res.getColumn(1).getString();
-    auto catIdIt = std::find(catNames.begin(), catNames.end(), cat);
-    auto subcatIdIt = std::find(catNames.begin(), catNames.end(), subcat);
-    assert(catIdIt != catNames.end());
-    assert(subcatIdIt != catNames.end());
-    m_cat = catIdIt - catNames.begin();
-    m_subCat = subcatIdIt - catNames.begin();
-  };
+                const std::vector<std::string> &catNames);
 
   size_t m_cat;
   size_t m_subCat;
 
   // Structured binding implementation
   template <std::size_t Index>
-  std::tuple_element_t<Index, CategoryEntry> &get() {
-    if constexpr (Index == 0)
-      return m_cat;
-    if constexpr (Index == 1)
-      return m_subCat;
-  }
+  std::tuple_element_t<Index, CategoryEntry> &get();
 };
+
+template <std::size_t Index>
+inline std::tuple_element_t<Index, CategoryEntry> &CategoryEntry::get() {
+  if constexpr (Index == 0)
+    return m_cat;
+  if constexpr (Index == 1)
+    return m_subCat;
+}
 
 struct TransactionEntry {
   TransactionEntry(SQLite::Statement &res,
-                   const std::vector<std::string> &catNames)
-      : m_date(res.getColumn(0).getInt()), m_desc(res.getColumn(1).getString()),
-        m_value(res.getColumn(2).getDouble()) {
-    std::string subcat = res.getColumn(3).getString();
-    auto subcatIdIt = std::find(catNames.begin(), catNames.end(), subcat);
-    assert(subcatIdIt != catNames.end());
-    m_subCat = subcatIdIt - catNames.begin();
-  }
+                   const std::vector<std::string> &catNames);
 
   uint32_t m_date; // UNIX
   std::string m_desc;
@@ -51,17 +38,20 @@ struct TransactionEntry {
 
   // Structured binding implementation
   template <std::size_t Index>
-  std::tuple_element_t<Index, TransactionEntry> &get() {
-    if constexpr (Index == 0)
-      return m_date;
-    if constexpr (Index == 1)
-      return m_desc;
-    if constexpr (Index == 2)
-      return m_value;
-    if constexpr (Index == 3)
-      return m_subCat;
-  }
+  std::tuple_element_t<Index, TransactionEntry> &get();
 };
+
+template <std::size_t Index>
+inline std::tuple_element_t<Index, TransactionEntry> &TransactionEntry::get() {
+  if constexpr (Index == 0)
+    return m_date;
+  if constexpr (Index == 1)
+    return m_desc;
+  if constexpr (Index == 2)
+    return m_value;
+  if constexpr (Index == 3)
+    return m_subCat;
+}
 
 class DBHandler {
 public:
