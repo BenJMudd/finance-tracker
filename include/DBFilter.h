@@ -9,6 +9,8 @@ class DBHandler;
 
 class DBFilter {
 public:
+  using SPtr = std::shared_ptr<DBFilter>;
+
   DBFilter(DBHandler &db);
   void SetStartDate(uint32_t date) {
     m_startDate = date;

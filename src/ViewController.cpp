@@ -5,7 +5,10 @@ ViewController::ViewController(StateController &controller)
 
 void ViewController::RefreshViews() {
   for (auto &[id, view] : m_views) {
-    view->GetFilter().BuildCache();
+    DBFilter* filter = view->GetFilter();
+    if (filter)
+      filter->BuildCache();
+
     view->Refresh();
   }
 }

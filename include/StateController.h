@@ -16,6 +16,10 @@ public:
     return m_filters.back();
   }
 
+  std::vector<std::string> GetAllCategoryNames() {
+    return m_dbHandler.GetCategoryNames();
+  }
+
 private:
   ViewController m_viewController;
   DBHandler m_dbHandler;

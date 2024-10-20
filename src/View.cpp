@@ -52,6 +52,19 @@ void EditFilter::Refresh() {}
 
 void EditFilter::Render() {}
 
-void EditFilter::EnterSubCatToOverride(uint8_t subcatId) {
-  m_dataViewer->OmitSubCategory(subcatId);
+void EditFilter::EnterSubCatToOmit(uint8_t subcatId) {
+  for (auto &filter : m_filters) {
+    filter->OmitSubCategory(subcatId);
+  }
+}
+void EditFilter::EnterCatToOmit(uint8_t catId) {
+  for (auto &filter : m_filters) {
+    filter->OmitSubCategory(catId);
+  }
+}
+
+void EditFilter::EnterStartDate(uint32_t startDate) {
+  for (auto &filter : m_filters) {
+    filter->SetStartDate(startDate);
+  }
 }

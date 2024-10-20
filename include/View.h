@@ -5,10 +5,11 @@
 
 class View {
 public:
-  View(std::shared_ptr<DBFilter> dataViewer) : m_dataViewer(dataViewer) {}
+  View(std::shared_ptr<DBFilter> dataViewer = nullptr)
+      : m_dataViewer(dataViewer) {}
   virtual void Refresh() = 0;
   virtual void Render() = 0;
-  DBFilter &GetFilter() { return *m_dataViewer.get(); }
+  DBFilter *GetFilter() { return m_dataViewer.get(); }
 
 protected:
   std::shared_ptr<DBFilter> m_dataViewer;
@@ -17,8 +18,8 @@ protected:
 // test views
 class MostExpensivePurchase : public View {
 public:
-  MostExpensivePurchase(std::shared_ptr<DBFilter> dataView, bool verbose)
-      : m_verbose(verbose), View(dataView) {}
+  MostExpensivePurchase(std::shared_ptr<DBFilter> filter, bool verbose)
+      : m_verbose(verbose), View(filter) {}
 
   void Refresh() override;
   void Render() override;
@@ -29,7 +30,7 @@ private:
 
 class ListTransactions : public View {
 public:
-  ListTransactions(std::shared_ptr<DBFilter> &dataView) : View(dataView) {}
+  ListTransactions(std::shared_ptr<DBFilter> &filter) : View(filter) {}
 
   void Refresh() override;
   void Render() override;
@@ -37,9 +38,17 @@ public:
 
 class EditFilter : public View {
 public:
-  EditFilter(std::shared_ptr<DBFilter> &dataView) : View(dataView) {}
+  // Not sure how much i like passing a nullptr to View
+  template <typename... Args> EditFilter(Args &&...filters) : View() {
+    m_filters = {{filters...}};
+  }
 
   void Refresh() override;
   void Render() override;
-  void EnterSubCatToOverride(uint8_t subcatId);
+  void EnterSubCatToOmit(uint8_t subcatId);
+  void EnterCatToOmit(uint8_t catId);
+  void EnterStartDate(uint32_t startDate);
+
+private:
+  std::vector<DBFilter::SPtr> m_filters;
 };
