@@ -28,6 +28,7 @@ inline std::tuple_element_t<Index, CategoryEntry> &CategoryEntry::get() {
 }
 
 struct TransactionEntry {
+  TransactionEntry() {}
   TransactionEntry(SQLite::Statement &res,
                    const std::vector<std::string> &catNames);
 
@@ -56,6 +57,7 @@ inline std::tuple_element_t<Index, TransactionEntry> &TransactionEntry::get() {
 class DBHandler {
 public:
   DBHandler(std::string_view fileName);
+  // TODO: add template constraints
   template <typename T> std::vector<T> ExecuteQuery(std::string_view query);
   const std::map<size_t, std::set<size_t>> &GetCategoryMapping() {
     return m_categoryMapping;
@@ -63,8 +65,8 @@ public:
   const std::vector<std::string> &GetCategoryNames() { return m_categoryNames; }
 
 private:
-  struct CategoryEntryName {
-    CategoryEntryName(SQLite::Statement &res,
+  struct CategoryNameEntry {
+    CategoryNameEntry(SQLite::Statement &res,
                       const std::vector<std::string> &catNames)
         : m_cat(res.getColumn(0).getString()),
           m_subCat(res.getColumn(1).getString()){};

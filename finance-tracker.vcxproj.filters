@@ -60,9 +60,6 @@
     <ClCompile Include="src\DBFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\DataViewer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\View.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -122,13 +119,13 @@
     <ClInclude Include="include\DBFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\DataViewer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\ViewController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StateController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

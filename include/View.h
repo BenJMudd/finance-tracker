@@ -1,14 +1,36 @@
 #pragma once
 
-#include "DBHandler.h"
-#include "DataViewer.h"
+#include "DBFilter.h"
 #include <vector>
 
 class View {
 public:
-  View(DataViewer &dataViewer) : m_dataViewer(dataViewer) {}
+  View(std::shared_ptr<DBFilter> dataViewer) : m_dataViewer(dataViewer) {}
   virtual void Refresh() = 0;
+  virtual void Render() = 0;
+  DBFilter &GetFilter() { return *m_dataViewer.get(); }
+
+protected:
+  std::shared_ptr<DBFilter> m_dataViewer;
+};
+
+// test views
+class MostExpensivePurchase : public View {
+public:
+  MostExpensivePurchase(std::shared_ptr<DBFilter> dataView, bool verbose)
+      : m_verbose(verbose), View(dataView) {}
+
+  void Refresh() override;
+  void Render() override;
 
 private:
-  DataViewer &m_dataViewer;
+  bool m_verbose;
+};
+
+class ListTransactions : public View {
+public:
+  ListTransactions(std::shared_ptr<DBFilter> &dataView) : View(dataView) {}
+
+  void Refresh() override;
+  void Render() override;
 };

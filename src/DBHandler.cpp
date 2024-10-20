@@ -7,7 +7,7 @@ DBHandler::DBHandler(std::string_view fileName) : m_db(fileName) {
 void DBHandler::BuildCategoryData() {
   m_categoryMapping.clear();
   m_categoryNames.clear();
-  auto categories = ExecuteQuery<CategoryEntryName>("select * from categories");
+  auto categories = ExecuteQuery<CategoryNameEntry>("select * from categories");
   for (auto &[category, subcategory] : categories) {
     auto catIt =
         std::find(m_categoryNames.begin(), m_categoryNames.end(), category);
