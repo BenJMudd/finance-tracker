@@ -75,6 +75,9 @@
     <IncludePath>C:\Users\Benja\Documents\prog\finance-tracker\include;C:\Users\Benja\Documents\prog\finance-tracker\lib;$(IncludePath)</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Users\Benja\Documents\prog\finance-tracker\lib;C:\Users\Benja\Documents\prog\finance-tracker\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -125,6 +128,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +142,7 @@
     <None Include="res\finances.db" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\StateController.cpp" />
     <ClCompile Include="lib\Backup.cpp" />
     <ClCompile Include="lib\Column.cpp" />
     <ClCompile Include="lib\Database.cpp" />
@@ -158,6 +163,7 @@
     <ClInclude Include="include\StateController.h" />
     <ClInclude Include="include\View.h" />
     <ClInclude Include="include\ViewController.h" />
+    <ClInclude Include="lib\rapidcsv.h" />
     <ClInclude Include="lib\sqlite3.h" />
     <ClInclude Include="lib\sqlite3ext.h" />
     <ClInclude Include="lib\SQLiteCpp\Assertion.h" />

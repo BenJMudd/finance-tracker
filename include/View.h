@@ -5,21 +5,20 @@
 
 class View {
 public:
-  View(std::shared_ptr<DBFilter> dataViewer = nullptr)
-      : m_dataViewer(dataViewer) {}
+  View(DBFilter *dataViewer = nullptr) : m_dataViewer(dataViewer) {}
   virtual void Refresh() = 0;
   virtual void Render() = 0;
-  DBFilter *GetFilter() { return m_dataViewer.get(); }
+  DBFilter *GetFilter() { return m_dataViewer; }
 
 protected:
-  std::shared_ptr<DBFilter> m_dataViewer;
+  DBFilter *m_dataViewer;
 };
 
 // test views
 class MostExpensivePurchase : public View {
 public:
-  MostExpensivePurchase(std::shared_ptr<DBFilter> filter, bool verbose)
-      : m_verbose(verbose), View(filter) {}
+  MostExpensivePurchase(DBFilter &filter, bool verbose)
+      : m_verbose(verbose), View(&filter) {}
 
   void Refresh() override;
   void Render() override;
@@ -30,7 +29,7 @@ private:
 
 class ListTransactions : public View {
 public:
-  ListTransactions(std::shared_ptr<DBFilter> &filter) : View(filter) {}
+  ListTransactions(DBFilter &filter) : View(&filter) {}
 
   void Refresh() override;
   void Render() override;
@@ -48,7 +47,8 @@ public:
   void EnterSubCatToOmit(uint8_t subcatId);
   void EnterCatToOmit(uint8_t catId);
   void EnterStartDate(uint32_t startDate);
+  void EnterEndDate(uint32_t endDate);
 
 private:
-  std::vector<DBFilter::SPtr> m_filters;
+  std::vector<DBFilter *> m_filters;
 };

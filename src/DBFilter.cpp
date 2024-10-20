@@ -43,8 +43,8 @@ void DBFilter::BuildCache() {
   }
 
   std::string query =
-      std::format("select * from transactions where {} one > {} and one < {}",
-                  catFilter, m_startDate.value_or(0), m_endDate.value_or(1000));
+      std::format("select * from transactions where {} one > {} and one < {}", catFilter,
+      m_startDate.value_or(0), m_endDate.value_or(1981906471));
   m_transactions = m_db.ExecuteQuery<TransactionEntry>(query);
   m_cacheValid = true;
 }

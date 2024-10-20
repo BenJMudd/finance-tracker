@@ -66,6 +66,9 @@
     <ClCompile Include="src\ViewController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="include\StateController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\sqlite3.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="include\StateController.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\rapidcsv.h">
+      <Filter>lib</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

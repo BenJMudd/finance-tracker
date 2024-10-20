@@ -11,10 +11,7 @@ public:
   }
 
   ViewController &GetViewController() { return m_viewController; }
-  std::shared_ptr<DBFilter> CreateFilter() {
-    m_filters.emplace_back(std::make_shared<DBFilter>(m_dbHandler));
-    return m_filters.back();
-  }
+  DBHandler &GetDB() { return m_dbHandler; }
 
   std::vector<std::string> GetAllCategoryNames() {
     return m_dbHandler.GetCategoryNames();
@@ -23,5 +20,4 @@ public:
 private:
   ViewController m_viewController;
   DBHandler m_dbHandler;
-  std::vector<std::shared_ptr<DBFilter>> m_filters;
 };
