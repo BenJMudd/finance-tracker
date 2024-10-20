@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="lib">
+      <UniqueIdentifier>{a2c68cf5-34a0-4438-b8ff-61dedc42c529}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lib\SQLitecpp">
+      <UniqueIdentifier>{43c821a6-5d1b-4172-8f05-61a5860fff4b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="res\finances.db">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\sqlite3.c">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Backup.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Column.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Database.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Exception.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Savepoint.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Statement.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\Transaction.cpp">
+      <Filter>lib</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DBHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DBFilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DataViewer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="lib\sqlite3.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\sqlite3ext.h">
+      <Filter>lib</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Assertion.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Backup.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Column.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Database.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Exception.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\ExecuteMany.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Savepoint.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\SQLiteCpp.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\SQLiteCppExport.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Statement.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Transaction.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\Utils.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\SQLiteCpp\VariadicBind.h">
+      <Filter>lib\SQLitecpp</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DBHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DBFilter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DataViewer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
