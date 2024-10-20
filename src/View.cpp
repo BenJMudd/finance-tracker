@@ -47,3 +47,11 @@ void ListTransactions::Render() {
 void ListTransactions::Refresh() {
   std::cout << "######### Transactions refresh #########\n" << std::endl;
 }
+
+void EditFilter::Refresh() {}
+
+void EditFilter::Render() {}
+
+void EditFilter::EnterSubCatToOverride(uint8_t subcatId) {
+  m_dataViewer->OmitSubCategory(subcatId);
+}

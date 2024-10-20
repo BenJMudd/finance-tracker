@@ -34,3 +34,12 @@ public:
   void Refresh() override;
   void Render() override;
 };
+
+class EditFilter : public View {
+public:
+  EditFilter(std::shared_ptr<DBFilter> &dataView) : View(dataView) {}
+
+  void Refresh() override;
+  void Render() override;
+  void EnterSubCatToOverride(uint8_t subcatId);
+};

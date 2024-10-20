@@ -7,13 +7,19 @@ int main() {
 
   StateController controller;
   auto filter = controller.CreateFilter();
-  controller.GetViewController().CreateView<ListTransactions>(filter);
-  controller.GetViewController().CreateView<MostExpensivePurchase>(filter,
-                                                                   false);
+  uint8_t listTransactionsId =
+      controller.GetViewController().CreateView<ListTransactions>(filter);
+  uint8_t mostExoId =
+      controller.GetViewController().CreateView<MostExpensivePurchase>(filter,
+                                                                       true);
+  uint8_t editFilterId =
+      controller.GetViewController().CreateView<EditFilter>(filter);
   controller.GetViewController().RenderViews();
   controller.GetViewController().RefreshViews();
   controller.GetViewController().RenderViews();
-  filter->OmitCategory(0);
+  controller.GetViewController()
+      .GetView<EditFilter>(editFilterId)
+      .EnterSubCatToOverride(1);
   controller.GetViewController().RenderViews();
   controller.GetViewController().RefreshViews();
   controller.GetViewController().RenderViews();
