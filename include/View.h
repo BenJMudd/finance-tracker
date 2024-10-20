@@ -8,7 +8,6 @@ public:
   View(DBFilter *dataViewer = nullptr) : m_dataViewer(dataViewer) {}
   virtual void Refresh() = 0;
   virtual void Render() = 0;
-  DBFilter *GetFilter() { return m_dataViewer; }
 
 protected:
   DBFilter *m_dataViewer;
@@ -33,6 +32,19 @@ public:
 
   void Refresh() override;
   void Render() override;
+};
+
+class ComparisonView : public View {
+public:
+  ComparisonView(DBFilter &lhs, DBFilter &rhs)
+      : m_lhs(lhs), m_rhs(rhs), View() {}
+
+  void Refresh() override;
+  void Render() override;
+
+private:
+  DBFilter &m_lhs;
+  DBFilter &m_rhs;
 };
 
 class EditFilter : public View {

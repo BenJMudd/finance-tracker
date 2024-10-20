@@ -14,10 +14,6 @@ DBFilter &ViewController::CreateFilter() {
 
 void ViewController::RefreshViews() {
   for (auto &[id, view] : m_views) {
-    DBFilter *filter = view->GetFilter();
-    if (filter)
-      filter->BuildCache();
-
     view->Refresh();
   }
 }

@@ -7,7 +7,6 @@
 class StateController {
 public:
   StateController() : m_dbHandler("res/finances.db"), m_viewController(*this) {
-    setlocale(LC_ALL, "en_GB.UTF-8");
   }
 
   ViewController &GetViewController() { return m_viewController; }

@@ -39,6 +39,7 @@ void MostExpensivePurchase::Render() {
 }
 
 void MostExpensivePurchase::Refresh() {
+  m_dataViewer->BuildCache();
   std::cout << "######### Most expensive refresh #########\n" << std::endl;
 }
 
@@ -61,12 +62,42 @@ void ListTransactions::Render() {
 }
 
 void ListTransactions::Refresh() {
+  m_dataViewer->BuildCache();
   std::cout << "######### Transactions refresh #########\n" << std::endl;
 }
 
-void EditFilter::Refresh() {}
+void EditFilter::Refresh() {
+  for (auto *filter : m_filters) {
+    filter->BuildCache();
+  }
+}
 
 void EditFilter::Render() {}
+
+void ComparisonView::Refresh() {
+  m_lhs.BuildCache();
+  m_rhs.BuildCache();
+  std::cout << "######### comparison refresh #########\n" << std::endl;
+}
+
+void ComparisonView::Render() {
+  std::cout << "######### Comparison begin #########" << std::endl;
+  bool isLHSCacheValid = false;
+  auto &lhsTrans = m_lhs.GetTransactions(isLHSCacheValid);
+  bool isRHSCacheValid = false;
+  auto &rhsTrans = m_rhs.GetTransactions(isRHSCacheValid);
+
+  if (isLHSCacheValid && isRHSCacheValid)
+    SetColor(FOREGROUND_GREEN, 0);
+  else
+    SetColor(FOREGROUND_RED, 0);
+
+  int diff = lhsTrans.size() - rhsTrans.size();
+  std::cout << "There was a difference of " << diff
+            << " in the number of transactions\n";
+  SetColor(7, 0);
+  std::cout << "######### Comparison end #########\n" << std::endl;
+}
 
 void EditFilter::EnterSubCatToOmit(uint8_t subcatId) {
   for (auto &filter : m_filters) {
