@@ -1,4 +1,5 @@
 #include "View.h"
+#include "imgui/imgui.h"
 #include <Windows.h>
 #include <chrono>
 
@@ -67,7 +68,7 @@ void ListTransactions::Refresh() {
 }
 
 void EditFilter::Refresh() {
-  for (auto *filter : m_filters) {
+  for (auto filter : m_filters) {
     filter->BuildCache();
   }
 }
@@ -119,5 +120,30 @@ void EditFilter::EnterStartDate(uint32_t startDate) {
 void EditFilter::EnterEndDate(uint32_t endDate) {
   for (auto &filter : m_filters) {
     filter->SetEndDate(endDate);
+  }
+}
+
+void ListTransactionsWindow::Refresh() { m_dataViewer->BuildCache(); }
+
+void ListTransactionsWindow::Render() {
+  bool isCacheValid = false;
+  auto &transactions = m_dataViewer->GetTransactions(isCacheValid);
+  if (ImGui::BeginTable(std::format("id : {}, Cache validity: {}",
+                                    (uint64_t)this,
+                                    (isCacheValid ? "true" : "False"))
+                            .c_str(),
+                        4)) {
+    for (auto &transaction : transactions) {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::Text("Date %u", transaction.m_date);
+      ImGui::TableNextColumn();
+      ImGui::Text(transaction.m_desc.c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text(std::to_string(transaction.m_value).c_str());
+      ImGui::TableNextColumn();
+      ImGui::Text(m_dataViewer->GetCategoryName(transaction.m_subCat).c_str());
+    }
+    ImGui::EndTable();
   }
 }

@@ -5,19 +5,29 @@
 
 class View {
 public:
-  View(DBFilter *dataViewer = nullptr) : m_dataViewer(dataViewer) {}
+  View(DBFilter::SPtr dataViewer = nullptr) : m_dataViewer(dataViewer) {}
   virtual void Refresh() = 0;
   virtual void Render() = 0;
+  virtual bool GetCacheValidity() {
+    if (m_dataViewer) {
+      return m_dataViewer->IsCacheValid();
+    }
+
+    return false;
+  }
+
+  virtual DBFilter &GetFilter() { return *m_dataViewer.get(); }
+  virtual void SetFilter(DBFilter::SPtr filter) { m_dataViewer = filter; }
 
 protected:
-  DBFilter *m_dataViewer;
+  DBFilter::SPtr m_dataViewer;
 };
 
 // test views
 class MostExpensivePurchase : public View {
 public:
-  MostExpensivePurchase(DBFilter &filter, bool verbose)
-      : m_verbose(verbose), View(&filter) {}
+  MostExpensivePurchase(DBFilter::SPtr filter, bool verbose)
+      : m_verbose(verbose), View(filter) {}
 
   void Refresh() override;
   void Render() override;
@@ -28,7 +38,15 @@ private:
 
 class ListTransactions : public View {
 public:
-  ListTransactions(DBFilter &filter) : View(&filter) {}
+  ListTransactions(DBFilter::SPtr filter) : View(filter) {}
+
+  void Refresh() override;
+  void Render() override;
+};
+
+class ListTransactionsWindow : public View {
+public:
+  ListTransactionsWindow(DBFilter::SPtr filter) : View(filter) {}
 
   void Refresh() override;
   void Render() override;
@@ -62,5 +80,5 @@ public:
   void EnterEndDate(uint32_t endDate);
 
 private:
-  std::vector<DBFilter *> m_filters;
+  std::vector<DBFilter::SPtr> m_filters;
 };

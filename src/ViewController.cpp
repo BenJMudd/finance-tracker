@@ -1,15 +1,14 @@
 #include "ViewController.h"
 #include "StateController.h"
+#include "imgui/imgui.h"
 
 ViewController::ViewController(StateController &controller)
     : m_controller(controller), m_viewIdCounter(0) {
-  // This is a ridiculously stupid hack
-  m_filters.reserve(100);
+  m_mainFilter = std::make_shared<DBFilter>(m_controller.GetDB());
 }
 
-DBFilter &ViewController::CreateFilter() {
-  m_filters.emplace_back(std::make_unique<DBFilter>(m_controller.GetDB()));
-  return *m_filters.back();
+DBFilter::SPtr ViewController::CreateFilter() {
+  return std::make_shared<DBFilter>(m_controller.GetDB());
 }
 
 void ViewController::RefreshViews() {

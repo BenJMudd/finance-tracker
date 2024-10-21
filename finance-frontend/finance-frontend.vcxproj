@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{6fc052cb-c589-412a-bfb3-df0aa31ae896}</ProjectGuid>
-    <RootNamespace>financetracker</RootNamespace>
+    <ProjectGuid>{3de6407e-afe9-4094-81c3-5fc7557e84ef}</ProjectGuid>
+    <RootNamespace>financefrontend</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>finance-server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -73,10 +71,6 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Benja\Documents\prog\finance-tracker\include;C:\Users\Benja\Documents\prog\finance-tracker\lib;$(IncludePath)</IncludePath>
-    <LibraryPath>$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Users\Benja\Documents\prog\finance-tracker\lib;C:\Users\Benja\Documents\prog\finance-tracker\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -118,7 +112,6 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;d3dcompiler.lib;dxgi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -129,7 +122,6 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,73 +131,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="res\finances.db" />
+    <ClCompile Include="run.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="lib\Backup.cpp" />
-    <ClCompile Include="lib\Column.cpp" />
-    <ClCompile Include="lib\Database.cpp" />
-    <ClCompile Include="lib\Exception.cpp" />
-    <ClCompile Include="lib\imgui\imgui.cpp" />
-    <ClCompile Include="lib\imgui\imgui_demo.cpp" />
-    <ClCompile Include="lib\imgui\imgui_draw.cpp" />
-    <ClCompile Include="lib\imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="lib\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="lib\imgui\imgui_tables.cpp" />
-    <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="lib\Savepoint.cpp" />
-    <ClCompile Include="lib\sqlite3.c" />
-    <ClCompile Include="lib\Statement.cpp" />
-    <ClCompile Include="lib\Transaction.cpp" />
-    <ClCompile Include="src\App.cpp" />
-    <ClCompile Include="src\DBFilter.cpp" />
-    <ClCompile Include="src\DBHandler.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\View.cpp" />
-    <ClCompile Include="src\ViewController.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\App.h" />
-    <ClInclude Include="include\DBFilter.h" />
-    <ClInclude Include="include\DBHandler.h" />
-    <ClInclude Include="include\StateController.h" />
-    <ClInclude Include="include\View.h" />
-    <ClInclude Include="include\ViewController.h" />
-    <ClInclude Include="lib\imgui\imconfig.h" />
-    <ClInclude Include="lib\imgui\imgui.h" />
-    <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="lib\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="lib\imgui\imgui_internal.h" />
-    <ClInclude Include="lib\imgui\imstb_rectpack.h" />
-    <ClInclude Include="lib\imgui\imstb_textedit.h" />
-    <ClInclude Include="lib\imgui\imstb_truetype.h" />
-    <ClInclude Include="lib\rapidcsv.h" />
-    <ClInclude Include="lib\sqlite3.h" />
-    <ClInclude Include="lib\sqlite3ext.h" />
-    <ClInclude Include="lib\SQLiteCpp\Assertion.h" />
-    <ClInclude Include="lib\SQLiteCpp\Backup.h" />
-    <ClInclude Include="lib\SQLiteCpp\Column.h" />
-    <ClInclude Include="lib\SQLiteCpp\Database.h" />
-    <ClInclude Include="lib\SQLiteCpp\Exception.h" />
-    <ClInclude Include="lib\SQLiteCpp\ExecuteMany.h" />
-    <ClInclude Include="lib\SQLiteCpp\Savepoint.h" />
-    <ClInclude Include="lib\SQLiteCpp\SQLiteCpp.h" />
-    <ClInclude Include="lib\SQLiteCpp\SQLiteCppExport.h" />
-    <ClInclude Include="lib\SQLiteCpp\Statement.h" />
-    <ClInclude Include="lib\SQLiteCpp\Transaction.h" />
-    <ClInclude Include="lib\SQLiteCpp\Utils.h" />
-    <ClInclude Include="lib\SQLiteCpp\VariadicBind.h" />
+    <ProjectReference Include="..\finance-tracker.vcxproj">
+      <Project>{6fc052cb-c589-412a-bfb3-df0aa31ae896}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets')" />
   </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.props'))" />
-    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.220531.1\build\native\Microsoft.Windows.CppWinRT.targets'))" />
-  </Target>
 </Project>

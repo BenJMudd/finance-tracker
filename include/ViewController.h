@@ -13,7 +13,8 @@ public:
   ViewController(StateController &controller);
   // TODO: add template constraints
   template <typename T, typename... Args> uint8_t CreateView(Args &&...args);
-  DBFilter &CreateFilter();
+  DBFilter::SPtr CreateFilter();
+  DBFilter::SPtr GetMainFilter() { return m_mainFilter; }
 
   // TODO: add template constraints
   template <typename T> T &GetView(uint8_t viewId) {
@@ -26,8 +27,8 @@ public:
 
 private:
   std::map<size_t, std::unique_ptr<View>> m_views;
-  std::vector<std::unique_ptr<DBFilter>> m_filters;
   StateController &m_controller;
+  std::shared_ptr<DBFilter> m_mainFilter;
 
   uint8_t m_viewIdCounter;
 };

@@ -9,6 +9,8 @@ class DBHandler;
 
 class DBFilter {
 public:
+  using SPtr = std::shared_ptr<DBFilter>;
+
   DBFilter(DBHandler &db);
   void SetStartDate(uint32_t date) {
     m_startDate = date;
@@ -30,7 +32,7 @@ public:
   const std::vector<TransactionEntry> &GetTransactions(bool &isCacheValid);
   void BuildCache();
   void InvalidateCache() { m_cacheValid = false; }
-
+  bool IsCacheValid() { return m_cacheValid; }
   std::string GetCategoryName(size_t id);
 
 private:
