@@ -29,6 +29,14 @@ public:
     m_cacheValid = false;
   }
 
+  void ClearFilter() {
+    m_omitCategories.clear();
+    m_omitSubcategories.clear();
+    m_startDate = std::nullopt;
+    m_endDate = std::nullopt;
+    m_cacheValid = false;
+  }
+
   const std::vector<TransactionEntry> &GetTransactions(bool &isCacheValid);
   void BuildCache();
   void InvalidateCache() { m_cacheValid = false; }

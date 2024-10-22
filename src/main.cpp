@@ -175,7 +175,7 @@ int main(int, char **) {
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
     app.Render();
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
     ImGui::Render();
 
     FrameContext *frameCtx = WaitForNextFrameResources();

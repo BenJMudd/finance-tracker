@@ -1,5 +1,6 @@
 #pragma once
 #include "StateController.h"
+#include "imgui/imgui.h"
 
 class App {
 public:
@@ -10,10 +11,15 @@ public:
 private:
   void RenderTitleBar();
   void RenderMainView();
-  void RenderFullScreen();
   void RenderViewWnd(std::optional<uint8_t> &viewHandle);
+  void RenderSetCategories(std::vector<bool> &viewFilter, DBFilter &filter);
+  void UpdateFilter(std::vector<bool> &viewFilter, DBFilter &filter);
   StateController m_controller;
   std::optional<uint8_t> m_leftViewHandle;
   std::optional<uint8_t> m_topRightViewHandle;
   std::optional<uint8_t> m_bottomRightViewHandle;
+  std::map<uint8_t, std::pair<std::vector<bool>, DBFilter *>>
+      m_viewsWithCustomFilters;
+  bool m_demoWindowOpen;
+  std::vector<bool> m_mainViewFilters;
 };
