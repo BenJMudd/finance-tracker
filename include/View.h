@@ -37,6 +37,7 @@ public:
   virtual bool GetCacheValidity() override {
     return m_dataViewer->IsCacheValid();
   }
+  virtual std::string GetViewName() = 0;
 
 protected:
   DBFilter::SPtr m_dataViewer;
@@ -48,5 +49,6 @@ public:
                          DBFilter::SPtr filter)
       : SingleFilterView(viewId, viewController, filter) {}
 
+  std::string GetViewName() override { return "List transactions view"; }
   void RenderMainView() override;
 };

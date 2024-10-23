@@ -94,7 +94,5 @@ void App::RenderViewWnd(std::optional<uint8_t> &viewHandle) {
     return;
   }
   View &view = m_controller.GetViewController().GetView<View>(*viewHandle);
-  ImGui::BeginChild(std::format("view {}", *viewHandle).c_str());
   view.Render();
-  ImGui::EndChild();
 }

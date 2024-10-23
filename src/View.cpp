@@ -8,7 +8,8 @@ using namespace std::chrono;
 
 void SingleFilterView::Render() {
   RenderTaskbar(m_viewId, m_dataViewer, *this, m_viewController);
-  ImGui::BeginChild(std::format("view {}", m_viewId).c_str());
+
+  ImGui::BeginChild(std::format("viewint {}", m_viewId).c_str());
   RenderMainView();
   ImGui::EndChild();
 }
@@ -16,9 +17,23 @@ void SingleFilterView::Render() {
 void SingleFilterView::RenderTaskbar(uint8_t viewId, DBFilter::SPtr &filter,
                                      SingleFilterView &view,
                                      ViewController &viewController) {
-  if (ImGui::BeginMenu(std::format("View id: {}, cache validity: {}", viewId,
-                                   filter->IsCacheValid() ? "valid" : "invalid")
-                           .c_str())) {
+  ImGui::PushStyleColor(ImGuiCol_Button,
+                        !filter->IsCacheValid()
+                            ? ImVec4(1.0f, 0.5f, 0.5f, 1.0f)
+                            : (filter == viewController.GetMainFilter()
+                                   ? ImVec4(0.2f, 0.5f, 0.2f, 1.0f)
+                                   : ImVec4(0.2f, 0.2f, 0.5f, 1.0f)));
+  if (ImGui::Button(
+          std::format("{} (Click to open settings)",
+                      viewController.GetView<ListTransactionsWindow>(viewId)
+                          .GetViewName(),
+                      filter->IsCacheValid() ? "valid" : "invalid")
+              .c_str(),
+          ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+    ImGui::OpenPopup(std::format("popupid: {}", viewId).c_str());
+  }
+  ImGui::PopStyleColor();
+  if (ImGui::BeginPopup(std::format("popupid: {}", viewId).c_str())) {
     if (ImGui::MenuItem("refresh view")) {
       view.Refresh();
     }
@@ -40,8 +55,7 @@ void SingleFilterView::RenderTaskbar(uint8_t viewId, DBFilter::SPtr &filter,
       }
       RenderSetCategories(filter);
     }
-
-    ImGui::EndMenu();
+    ImGui::EndPopup();
   }
 }
 void SingleFilterView::RenderSetCategories(DBFilter::SPtr &filter) {
