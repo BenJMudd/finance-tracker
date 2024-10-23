@@ -1,131 +1,89 @@
 #include "View.h"
+#include "ViewController.h"
 #include "imgui/imgui.h"
 #include <Windows.h>
 #include <chrono>
 
 using namespace std::chrono;
 
-// Function to set the console text and background color
-void SetColor(int textColor, int bgColor) {
-  HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-  SetConsoleTextAttribute(hConsole, (bgColor << 4) | textColor);
+void SingleFilterView::Render() {
+  RenderTaskbar(m_viewId, m_dataViewer, *this, m_viewController);
+  ImGui::BeginChild(std::format("view {}", m_viewId).c_str());
+  RenderMainView();
+  ImGui::EndChild();
 }
 
-void MostExpensivePurchase::Render() {
-  std::cout << "######### Most expensive Begin #########" << std::endl;
-  bool isCacheValid = false;
-  auto &transactions = m_dataViewer->GetTransactions(isCacheValid);
-  if (isCacheValid)
-    SetColor(FOREGROUND_GREEN, 0);
-  else
-    SetColor(FOREGROUND_RED, 0);
-
-  TransactionEntry mostExpensive;
-  mostExpensive.m_value = 0;
-  for (auto &transaction : transactions) {
-    if (transaction.m_value < mostExpensive.m_value) {
-      mostExpensive = transaction;
+void SingleFilterView::RenderTaskbar(uint8_t viewId, DBFilter::SPtr &filter,
+                                     SingleFilterView &view,
+                                     ViewController &viewController) {
+  if (ImGui::BeginMenu(std::format("View id: {}, cache validity: {}", viewId,
+                                   filter->IsCacheValid() ? "valid" : "invalid")
+                           .c_str())) {
+    if (ImGui::MenuItem("refresh view")) {
+      view.Refresh();
     }
-  }
+    if (filter == viewController.GetMainFilter()) {
 
-  std::cout << "Most expensive transaction is " << mostExpensive.m_value;
-  if (m_verbose) {
-    std::cout << "(" << sys_seconds{seconds(mostExpensive.m_date)} << ","
-              << mostExpensive.m_desc << ","
-              << m_dataViewer->GetCategoryName(mostExpensive.m_subCat) << ")\n";
-  }
+      if (ImGui::MenuItem("Filter")) {
+        DBFilter::SPtr newFilter = viewController.CreateFilter();
+        viewController.GetView<SingleFilterView>(viewId).SetFilter(newFilter);
+        newFilter->BuildCache();
+      }
+      if (ImGui::MenuItem("Reset filter")) {
+        viewController.GetView<SingleFilterView>(viewId).SetFilter(
+            viewController.GetMainFilter());
+      }
+    } else {
+      if (ImGui::MenuItem("Reset filter")) {
+        viewController.GetView<SingleFilterView>(viewId).SetFilter(
+            viewController.GetMainFilter());
+      }
+      RenderSetCategories(filter);
+    }
 
-  SetColor(7, 0);
-  std::cout << "######### Most expensive end #########\n" << std::endl;
-}
-
-void MostExpensivePurchase::Refresh() {
-  m_dataViewer->BuildCache();
-  std::cout << "######### Most expensive refresh #########\n" << std::endl;
-}
-
-void ListTransactions::Render() {
-  std::cout << "######### Transactions begin #########" << std::endl;
-  bool isCacheValid = false;
-  auto &transactions = m_dataViewer->GetTransactions(isCacheValid);
-  if (isCacheValid)
-    SetColor(FOREGROUND_GREEN, 0);
-  else
-    SetColor(FOREGROUND_RED, 0);
-  for (auto &transaction : transactions) {
-    std::cout << "Date: " << transaction.m_date << ", " << transaction.m_desc
-              << ", " << m_dataViewer->GetCategoryName(transaction.m_subCat)
-              << ", " << transaction.m_value << std::endl;
-  }
-
-  SetColor(7, 0);
-  std::cout << "######### Transactions end #########\n" << std::endl;
-}
-
-void ListTransactions::Refresh() {
-  m_dataViewer->BuildCache();
-  std::cout << "######### Transactions refresh #########\n" << std::endl;
-}
-
-void EditFilter::Refresh() {
-  for (auto filter : m_filters) {
-    filter->BuildCache();
+    ImGui::EndMenu();
   }
 }
+void SingleFilterView::RenderSetCategories(DBFilter::SPtr &filter) {
 
-void EditFilter::Render() {}
-
-void ComparisonView::Refresh() {
-  m_lhs.BuildCache();
-  m_rhs.BuildCache();
-  std::cout << "######### comparison refresh #########\n" << std::endl;
-}
-
-void ComparisonView::Render() {
-  std::cout << "######### Comparison begin #########" << std::endl;
-  bool isLHSCacheValid = false;
-  auto &lhsTrans = m_lhs.GetTransactions(isLHSCacheValid);
-  bool isRHSCacheValid = false;
-  auto &rhsTrans = m_rhs.GetTransactions(isRHSCacheValid);
-
-  if (isLHSCacheValid && isRHSCacheValid)
-    SetColor(FOREGROUND_GREEN, 0);
-  else
-    SetColor(FOREGROUND_RED, 0);
-
-  int diff = lhsTrans.size() - rhsTrans.size();
-  std::cout << "There was a difference of " << diff
-            << " in the number of transactions\n";
-  SetColor(7, 0);
-  std::cout << "######### Comparison end #########\n" << std::endl;
-}
-
-void EditFilter::EnterSubCatToOmit(uint8_t subcatId) {
-  for (auto &filter : m_filters) {
-    filter->OmitSubCategory(subcatId);
+  ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
+  bool changesMade = false;
+  if (ImGui::Button("Select all")) {
+    filter->SetAllCategories();
   }
-}
-void EditFilter::EnterCatToOmit(uint8_t catId) {
-  for (auto &filter : m_filters) {
-    filter->OmitSubCategory(catId);
+  ImGui::SameLine();
+  if (ImGui::Button("Deselect all")) {
+    filter->OmitAllCategories();
   }
-}
 
-void EditFilter::EnterStartDate(uint32_t startDate) {
-  for (auto &filter : m_filters) {
-    filter->SetStartDate(startDate);
+  const std::vector<std::string> &catNames = filter->GetCategoryNames();
+  auto &catMappings = filter->GetCategoryMapping();
+
+  static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ScopeRect;
+  for (auto it = catMappings.cbegin(); it != catMappings.end(); ++it) {
+    ImGui::BeginMultiSelect(flags, 0, catMappings.size());
+    ImGui::SeparatorText(
+        std::format("Category: {}", catNames[it->first]).c_str());
+
+    for (size_t subCatId : it->second) {
+      std::string label = catNames[subCatId];
+      if (ImGui::Selectable(label.c_str(),
+                            filter->IsCategoryActive(subCatId))) {
+        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+          filter->SetCategoryState(subCatId, false);
+        } else {
+          filter->SetCategoryState(subCatId, true);
+        }
+        changesMade = true;
+      }
+    }
+
+    ImGui::EndMultiSelect();
   }
+  ImGui::PopItemFlag();
 }
 
-void EditFilter::EnterEndDate(uint32_t endDate) {
-  for (auto &filter : m_filters) {
-    filter->SetEndDate(endDate);
-  }
-}
-
-void ListTransactionsWindow::Refresh() { m_dataViewer->BuildCache(); }
-
-void ListTransactionsWindow::Render() {
+void ListTransactionsWindow::RenderMainView() {
   bool isCacheValid = false;
   auto &transactions = m_dataViewer->GetTransactions(isCacheValid);
   if (ImGui::BeginTable(std::format("id : {}, Cache validity: {}",
@@ -147,3 +105,5 @@ void ListTransactionsWindow::Render() {
     ImGui::EndTable();
   }
 }
+
+void View::RenderTaskbar(ViewController &viewController, uint8_t viewId) {}

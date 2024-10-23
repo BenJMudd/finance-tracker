@@ -24,9 +24,9 @@ void App::RenderTitleBar() {
       if (ImGui::MenuItem("Set date range")) {
       }
       if (ImGui::BeginMenu("SetCategories")) {
-        RenderSetCategories(
-            m_mainViewFilters,
-            *m_controller.GetViewController().GetMainFilter().get());
+        DBFilter::SPtr &mainFilter =
+            m_controller.GetViewController().GetMainFilter();
+        SingleFilterView::RenderSetCategories(mainFilter);
         ImGui::EndMenu();
       }
       if (ImGui::MenuItem("Refresh all views")) {
@@ -93,97 +93,8 @@ void App::RenderViewWnd(std::optional<uint8_t> &viewHandle) {
     }
     return;
   }
-
   View &view = m_controller.GetViewController().GetView<View>(*viewHandle);
-  if (ImGui::BeginMenu(
-          std::format("View id: {}, cache validity: {}", *viewHandle,
-                      view.GetCacheValidity() ? "valid" : "invalid")
-              .c_str())) {
-    if (ImGui::MenuItem("refresh view")) {
-      view.Refresh();
-    }
-    auto viewIt = m_viewsWithCustomFilters.find(*viewHandle);
-    if (viewIt != m_viewsWithCustomFilters.end()) {
-      RenderSetCategories(viewIt->second.first, *viewIt->second.second);
-    } else {
-      if (ImGui::MenuItem("Filter")) {
-
-        DBFilter::SPtr newFilter =
-            m_controller.GetViewController().CreateFilter();
-        std::vector<bool> filterTracking(
-            m_controller.GetDB().GetCategoryNames().size(), true);
-        m_controller.GetViewController()
-            .GetView<View>(*viewHandle)
-            .SetFilter(newFilter);
-        m_viewsWithCustomFilters.insert(
-            {*viewHandle, {filterTracking, newFilter.get()}});
-      }
-      if (ImGui::MenuItem("Reset filter")) {
-        view.SetFilter(m_controller.GetViewController().GetMainFilter());
-      }
-    }
-    ImGui::EndMenu();
-  }
-
   ImGui::BeginChild(std::format("view {}", *viewHandle).c_str());
   view.Render();
   ImGui::EndChild();
-}
-
-void App::RenderSetCategories(std::vector<bool> &viewFilter, DBFilter &filter) {
-  ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
-  bool changesMade = false;
-  if (ImGui::Button("Select all")) {
-    std::fill(viewFilter.begin(), viewFilter.end(), true);
-    changesMade = true;
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Deselect all")) {
-    std::fill(viewFilter.begin(), viewFilter.end(), false);
-    changesMade = true;
-  }
-
-  const std::vector<std::string> &catNames =
-      m_controller.GetDB().GetCategoryNames();
-  auto &catMappings = m_controller.GetDB().GetCategoryMapping();
-
-  static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ScopeRect;
-  for (auto it = catMappings.cbegin(); it != catMappings.end(); ++it) {
-    ImGui::BeginMultiSelect(flags, 0, catMappings.size());
-    ImGui::SeparatorText(
-        std::format("Category: {}", catNames[it->first]).c_str());
-
-    for (size_t subCatId : it->second) {
-      std::string label = catNames[subCatId];
-      if (ImGui::Selectable(label.c_str(), viewFilter[subCatId])) {
-        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-          viewFilter[subCatId] = false;
-        } else {
-          viewFilter[subCatId] = true;
-        }
-        changesMade = true;
-      }
-    }
-
-    // Apply multi-select requests
-    ImGui::EndMultiSelect();
-  }
-  ImGui::PopItemFlag();
-
-  if (changesMade)
-    UpdateFilter(viewFilter, filter);
-}
-
-void App::UpdateFilter(std::vector<bool> &viewFilter, DBFilter &filter) {
-  filter.ClearFilter();
-  for (size_t i = 0; i < viewFilter.size(); ++i) {
-    if (!viewFilter[i]) {
-      // Is category or subcategory
-      bool isCategory = m_controller.GetDB().GetCategoryMapping().find(i) !=
-                        m_controller.GetDB().GetCategoryMapping().end();
-
-      if (!isCategory)
-        filter.OmitSubCategory(i);
-    }
-  }
 }

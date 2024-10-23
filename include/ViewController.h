@@ -14,7 +14,7 @@ public:
   // TODO: add template constraints
   template <typename T, typename... Args> uint8_t CreateView(Args &&...args);
   DBFilter::SPtr CreateFilter();
-  DBFilter::SPtr GetMainFilter() { return m_mainFilter; }
+  DBFilter::SPtr &GetMainFilter() { return m_mainFilter; }
 
   // TODO: add template constraints
   template <typename T> T &GetView(uint8_t viewId) {
@@ -35,6 +35,7 @@ private:
 
 template <typename T, typename... Args>
 inline uint8_t ViewController::CreateView(Args &&...args) {
-  m_views[++m_viewIdCounter] = std::make_unique<T>(args...);
-  return m_viewIdCounter;
+  m_views[m_viewIdCounter] =
+      std::make_unique<T>(m_viewIdCounter, *this, args...);
+  return m_viewIdCounter++;
 }

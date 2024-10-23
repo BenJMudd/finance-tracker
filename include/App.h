@@ -12,8 +12,6 @@ private:
   void RenderTitleBar();
   void RenderMainView();
   void RenderViewWnd(std::optional<uint8_t> &viewHandle);
-  void RenderSetCategories(std::vector<bool> &viewFilter, DBFilter &filter);
-  void UpdateFilter(std::vector<bool> &viewFilter, DBFilter &filter);
   StateController m_controller;
   std::optional<uint8_t> m_leftViewHandle;
   std::optional<uint8_t> m_topRightViewHandle;
