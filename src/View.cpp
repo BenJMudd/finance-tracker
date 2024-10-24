@@ -2,76 +2,80 @@
 #include "ViewController.h"
 #include "imgui/imgui.h"
 #include <Windows.h>
-#include <chrono>
+#include <time.h>
 
 using namespace std::chrono;
 
 void SingleFilterView::Render() {
-  RenderTaskbar(m_viewId, m_dataViewer, *this, m_viewController);
+  RenderTaskbar();
 
   ImGui::BeginChild(std::format("viewint {}", m_viewId).c_str());
   RenderMainView();
   ImGui::EndChild();
 }
 
-void SingleFilterView::RenderTaskbar(uint8_t viewId, DBFilter::SPtr &filter,
-                                     SingleFilterView &view,
-                                     ViewController &viewController) {
-  ImGui::PushStyleColor(ImGuiCol_Button,
-                        !filter->IsCacheValid()
-                            ? ImVec4(1.0f, 0.5f, 0.5f, 1.0f)
-                            : (filter == viewController.GetMainFilter()
-                                   ? ImVec4(0.2f, 0.5f, 0.2f, 1.0f)
-                                   : ImVec4(0.2f, 0.2f, 0.5f, 1.0f)));
-  if (ImGui::Button(
-          std::format("{} (Click to open settings)",
-                      viewController.GetView<ListTransactionsWindow>(viewId)
-                          .GetViewName(),
-                      filter->IsCacheValid() ? "valid" : "invalid")
-              .c_str(),
-          ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
-    ImGui::OpenPopup(std::format("popupid: {}", viewId).c_str());
-  }
-  ImGui::PopStyleColor();
-  if (ImGui::BeginPopup(std::format("popupid: {}", viewId).c_str())) {
-    if (ImGui::MenuItem("refresh view")) {
-      view.Refresh();
-    }
-    if (filter == viewController.GetMainFilter()) {
+void SingleFilterView::RenderTaskbar() {
 
-      if (ImGui::MenuItem("Filter")) {
-        DBFilter::SPtr newFilter = viewController.CreateFilter();
-        viewController.GetView<SingleFilterView>(viewId).SetFilter(newFilter);
+  if (!m_dataViewer->IsCacheValid()) {
+    ImGui::PushStyleColor(ImGuiCol_Button, m_colButtonInvalid);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_colButtonInvalidHover);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_colButtonInvalidActive);
+  } else if (m_dataViewer == m_viewController.GetMainFilter()) {
+    ImGui::PushStyleColor(ImGuiCol_Button, m_colButtonMainFilter);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_colButtonMainFilterHover);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_colButtonMainFilterActive);
+  } else {
+    ImGui::PushStyleColor(ImGuiCol_Button, m_colButtonSepFilter);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, m_colButtonSepFilterHover);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_colButtonSepFilterActive);
+  }
+
+  std::string viewName = GetViewName();
+  if (ImGui::Button(
+          std::format("{} (Click to open settings)", viewName).c_str(),
+          ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
+    ImGui::OpenPopup(std::format("popupid: {}", m_viewId).c_str());
+  }
+  ImGui::PopStyleColor(3);
+
+  if (ImGui::BeginPopup(std::format("popupid: {}", m_viewId).c_str())) {
+    RenderTaskbarExt();
+    ImGui::Separator();
+    if (m_dataViewer == m_viewController.GetMainFilter()) {
+
+      if (ImGui::MenuItem("Create new filter")) {
+        DBFilter::SPtr newFilter = m_viewController.CreateFilter();
+        SetFilter(newFilter);
         newFilter->BuildCache();
       }
-      if (ImGui::MenuItem("Reset filter")) {
-        viewController.GetView<SingleFilterView>(viewId).SetFilter(
-            viewController.GetMainFilter());
-      }
     } else {
-      if (ImGui::MenuItem("Reset filter")) {
-        viewController.GetView<SingleFilterView>(viewId).SetFilter(
-            viewController.GetMainFilter());
+      if (ImGui::Button("refresh view")) {
+        Refresh();
       }
-      RenderSetCategories(filter);
+      ImGui::SameLine();
+      if (ImGui::Button("Reset filter")) {
+        SetFilter(m_viewController.GetMainFilter());
+      }
+      ImGui::Separator();
+      RenderSetCategories();
     }
     ImGui::EndPopup();
   }
 }
-void SingleFilterView::RenderSetCategories(DBFilter::SPtr &filter) {
+
+void SingleFilterView::RenderSetCategories() {
 
   ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
-  bool changesMade = false;
   if (ImGui::Button("Select all")) {
-    filter->SetAllCategories();
+    m_dataViewer->SetAllCategories();
   }
   ImGui::SameLine();
   if (ImGui::Button("Deselect all")) {
-    filter->OmitAllCategories();
+    m_dataViewer->OmitAllCategories();
   }
 
-  const std::vector<std::string> &catNames = filter->GetCategoryNames();
-  auto &catMappings = filter->GetCategoryMapping();
+  const std::vector<std::string> &catNames = m_dataViewer->GetCategoryNames();
+  auto &catMappings = m_dataViewer->GetCategoryMapping();
 
   static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ScopeRect;
   for (auto it = catMappings.cbegin(); it != catMappings.end(); ++it) {
@@ -82,13 +86,14 @@ void SingleFilterView::RenderSetCategories(DBFilter::SPtr &filter) {
     for (size_t subCatId : it->second) {
       std::string label = catNames[subCatId];
       if (ImGui::Selectable(label.c_str(),
-                            filter->IsCategoryActive(subCatId))) {
-        if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-          filter->SetCategoryState(subCatId, false);
+                            m_dataViewer->IsCategoryActive(subCatId))) {
+        if (m_dataViewer->IsCategoryActive(subCatId)) {
+          if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+            m_dataViewer->SetCategoryState(subCatId, false);
+          }
         } else {
-          filter->SetCategoryState(subCatId, true);
+          m_dataViewer->SetCategoryState(subCatId, true);
         }
-        changesMade = true;
       }
     }
 
@@ -98,21 +103,31 @@ void SingleFilterView::RenderSetCategories(DBFilter::SPtr &filter) {
 }
 
 void ListTransactionsWindow::RenderMainView() {
+  static ImGuiTableFlags flags =
+      ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable |
+      ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV |
+      ImGuiTableFlags_ContextMenuInBody;
   bool isCacheValid = false;
   auto &transactions = m_dataViewer->GetTransactions(isCacheValid);
-  if (ImGui::BeginTable(std::format("id : {}, Cache validity: {}",
-                                    (uint64_t)this,
-                                    (isCacheValid ? "true" : "False"))
-                            .c_str(),
-                        4)) {
+  if (ImGui::BeginTable(
+          std::format("ListTransactionsWnd id:{}", m_viewId).c_str(), 4,
+          flags)) {
     for (auto &transaction : transactions) {
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
-      ImGui::Text("Date %u", transaction.m_date);
+      ImGui::Text(UnixToStr(transaction.m_date).c_str());
       ImGui::TableNextColumn();
-      ImGui::Text(transaction.m_desc.c_str());
+      std::string descriptionRaw = transaction.m_desc;
+      if (m_limitDescLen && descriptionRaw.size() > m_maxLimitDescLen)
+        descriptionRaw = std::format(
+            "{}...", descriptionRaw.substr(0, m_maxLimitDescLen - 3));
+      ImGui::Text(descriptionRaw.c_str());
       ImGui::TableNextColumn();
-      ImGui::Text(std::to_string(transaction.m_value).c_str());
+      std::string rawValue = std::to_string(abs(transaction.m_value));
+      std::string substrRawValue = rawValue.substr(0, rawValue.find('.') + 3);
+      std::string formattedValue = std::format(
+          "{}{}", transaction.m_value < 0.0f ? "-" : "", substrRawValue);
+      ImGui::TextUnformatted(formattedValue.c_str());
       ImGui::TableNextColumn();
       ImGui::Text(m_dataViewer->GetCategoryName(transaction.m_subCat).c_str());
     }
@@ -120,4 +135,19 @@ void ListTransactionsWindow::RenderMainView() {
   }
 }
 
+void ListTransactionsWindow::RenderTaskbarExt() {
+  ImGui::Checkbox("Limit description length", &m_limitDescLen);
+  ImGui::Text("Set description length limit");
+  ImGui::SliderInt("##mylabel", (int *)&m_maxLimitDescLen, 0, 60, "%d");
+}
+
 void View::RenderTaskbar(ViewController &viewController, uint8_t viewId) {}
+
+std::string View::UnixToStr(uint32_t unixTime) {
+  std::time_t temp = unixTime;
+  std::tm t;
+  gmtime_s(&t, &temp); // fuck da err
+  std::stringstream ss;
+  ss << std::put_time(&t, "%d-%m-%y");
+  return ss.str();
+}

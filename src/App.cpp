@@ -26,7 +26,8 @@ void App::RenderTitleBar() {
       if (ImGui::BeginMenu("SetCategories")) {
         DBFilter::SPtr &mainFilter =
             m_controller.GetViewController().GetMainFilter();
-        SingleFilterView::RenderSetCategories(mainFilter);
+        // TODO - this has obv broken
+        // SingleFilterView::RenderSetCategories(mainFilter);
         ImGui::EndMenu();
       }
       if (ImGui::MenuItem("Refresh all views")) {
