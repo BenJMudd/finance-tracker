@@ -13,7 +13,8 @@ public:
   virtual void Refresh() = 0;
   virtual void Render() = 0;
   virtual bool GetCacheValidity() = 0;
-  static void RenderTaskbar(ViewController &viewController, uint8_t viewId);
+
+  static void RenderSetCateogries(DBFilter &filter);
 
 protected:
   std::string UnixToStr(uint32_t unixTime);
@@ -32,7 +33,6 @@ public:
   virtual void RenderMainView() = 0;
   void RenderTaskbar();
   virtual void RenderTaskbarExt() = 0;
-  void RenderSetCategories();
 
   virtual DBFilter &GetFilter() { return *m_dataViewer.get(); }
   virtual void SetFilter(DBFilter::SPtr filter) { m_dataViewer = filter; }

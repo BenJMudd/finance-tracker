@@ -57,49 +57,10 @@ void SingleFilterView::RenderTaskbar() {
         SetFilter(m_viewController.GetMainFilter());
       }
       ImGui::Separator();
-      RenderSetCategories();
+      RenderSetCateogries(*m_dataViewer);
     }
     ImGui::EndPopup();
   }
-}
-
-void SingleFilterView::RenderSetCategories() {
-
-  ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
-  if (ImGui::Button("Select all")) {
-    m_dataViewer->SetAllCategories();
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Deselect all")) {
-    m_dataViewer->OmitAllCategories();
-  }
-
-  const std::vector<std::string> &catNames = m_dataViewer->GetCategoryNames();
-  auto &catMappings = m_dataViewer->GetCategoryMapping();
-
-  static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ScopeRect;
-  for (auto it = catMappings.cbegin(); it != catMappings.end(); ++it) {
-    ImGui::BeginMultiSelect(flags, 0, catMappings.size());
-    ImGui::SeparatorText(
-        std::format("Category: {}", catNames[it->first]).c_str());
-
-    for (size_t subCatId : it->second) {
-      std::string label = catNames[subCatId];
-      if (ImGui::Selectable(label.c_str(),
-                            m_dataViewer->IsCategoryActive(subCatId))) {
-        if (m_dataViewer->IsCategoryActive(subCatId)) {
-          if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-            m_dataViewer->SetCategoryState(subCatId, false);
-          }
-        } else {
-          m_dataViewer->SetCategoryState(subCatId, true);
-        }
-      }
-    }
-
-    ImGui::EndMultiSelect();
-  }
-  ImGui::PopItemFlag();
 }
 
 void ListTransactionsWindow::RenderMainView() {
@@ -141,7 +102,42 @@ void ListTransactionsWindow::RenderTaskbarExt() {
   ImGui::SliderInt("##mylabel", (int *)&m_maxLimitDescLen, 0, 60, "%d");
 }
 
-void View::RenderTaskbar(ViewController &viewController, uint8_t viewId) {}
+void View::RenderSetCateogries(DBFilter &filter) {
+  ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
+  if (ImGui::Button("Select all")) {
+    filter.SetAllCategories();
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Deselect all")) {
+    filter.OmitAllCategories();
+  }
+
+  const std::vector<std::string> &catNames = filter.GetCategoryNames();
+  auto &catMappings = filter.GetCategoryMapping();
+
+  static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ScopeRect;
+  for (auto it = catMappings.cbegin(); it != catMappings.end(); ++it) {
+    ImGui::BeginMultiSelect(flags, 0, catMappings.size());
+    ImGui::SeparatorText(
+        std::format("Category: {}", catNames[it->first]).c_str());
+
+    for (size_t subCatId : it->second) {
+      std::string label = catNames[subCatId];
+      if (ImGui::Selectable(label.c_str(), filter.IsCategoryActive(subCatId))) {
+        if (filter.IsCategoryActive(subCatId)) {
+          if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+            filter.SetCategoryState(subCatId, false);
+          }
+        } else {
+          filter.SetCategoryState(subCatId, true);
+        }
+      }
+    }
+
+    ImGui::EndMultiSelect();
+  }
+  ImGui::PopItemFlag();
+}
 
 std::string View::UnixToStr(uint32_t unixTime) {
   std::time_t temp = unixTime;

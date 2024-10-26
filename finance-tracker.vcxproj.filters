@@ -93,6 +93,9 @@
     <ClCompile Include="src\App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lib\imgui\ImGuiDatePicker.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\sqlite3.h">
@@ -184,6 +187,9 @@
     </ClInclude>
     <ClInclude Include="include\App.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\ImGuiDatePicker.hpp">
+      <Filter>lib\imgui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

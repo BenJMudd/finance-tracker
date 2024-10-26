@@ -148,6 +148,7 @@
     <ClCompile Include="lib\Database.cpp" />
     <ClCompile Include="lib\Exception.cpp" />
     <ClCompile Include="lib\imgui\imgui.cpp" />
+    <ClCompile Include="lib\imgui\ImGuiDatePicker.cpp" />
     <ClCompile Include="lib\imgui\imgui_demo.cpp" />
     <ClCompile Include="lib\imgui\imgui_draw.cpp" />
     <ClCompile Include="lib\imgui\imgui_impl_dx12.cpp" />
@@ -174,6 +175,7 @@
     <ClInclude Include="include\ViewController.h" />
     <ClInclude Include="lib\imgui\imconfig.h" />
     <ClInclude Include="lib\imgui\imgui.h" />
+    <ClInclude Include="lib\imgui\ImGuiDatePicker.hpp" />
     <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
     <ClInclude Include="lib\imgui\imgui_impl_win32.h" />
     <ClInclude Include="lib\imgui\imgui_internal.h" />
