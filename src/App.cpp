@@ -1,5 +1,4 @@
 #include "App.h"
-#include "imgui/ImGuiDatePicker.hpp"
 #include "imgui/imgui.h"
 #include <time.h>
 
@@ -23,35 +22,10 @@ void App::RenderTitleBar() {
       if (ImGui::MenuItem("Render demo window")) {
         m_demoWindowOpen = true;
       }
-      if (ImGui::BeginMenu("Set date range")) {
-        std::chrono::system_clock::time_point now =
-            std::chrono::system_clock::now();
-        std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
-        std::time_t unixOriginal(0);
-
-        tm startDateTm;
-        gmtime_s(&startDateTm, &unixOriginal); // fuck da err
-
-        tm endDateTm;
-        gmtime_s(&endDateTm, &currentTime); // fuck da err
-
-        if (ImGui::DatePicker("Start date", startDateTm)) {
-          // Perform some event whenever the date 't' is changed
-          int hold = 2;
-        }
-
-        if (ImGui::DatePicker("End date", endDateTm)) {
-          // Perform some event whenever the date 't' is changed
-          int hold = 2;
-        }
-        ImGui::EndMenu();
-      }
-      if (ImGui::BeginMenu("SetCategories")) {
-        DBFilter::SPtr &mainFilter =
-            m_controller.GetViewController().GetMainFilter();
-        View::RenderSetCateogries(*mainFilter);
-        ImGui::EndMenu();
-      }
+      DBFilter::SPtr &mainFilter =
+          m_controller.GetViewController().GetMainFilter();
+      View::RenderSetDate(*mainFilter);
+      View::RenderSetCateogries(*mainFilter);
       if (ImGui::MenuItem("Refresh all views")) {
         m_controller.GetViewController().RefreshViews();
       }

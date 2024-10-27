@@ -1,5 +1,6 @@
 #include "View.h"
 #include "ViewController.h"
+#include "imgui/ImGuiDatePicker.hpp"
 #include "imgui/imgui.h"
 #include <Windows.h>
 #include <time.h>
@@ -41,6 +42,11 @@ void SingleFilterView::RenderTaskbar() {
   if (ImGui::BeginPopup(std::format("popupid: {}", m_viewId).c_str())) {
     RenderTaskbarExt();
     ImGui::Separator();
+    if (ImGui::MenuItem("refresh view")) {
+      Refresh();
+    }
+    RenderSetDate(*m_dataViewer);
+    RenderSetCateogries(*m_dataViewer);
     if (m_dataViewer == m_viewController.GetMainFilter()) {
 
       if (ImGui::MenuItem("Create new filter")) {
@@ -49,15 +55,9 @@ void SingleFilterView::RenderTaskbar() {
         newFilter->BuildCache();
       }
     } else {
-      if (ImGui::Button("refresh view")) {
-        Refresh();
-      }
-      ImGui::SameLine();
-      if (ImGui::Button("Reset filter")) {
+      if (ImGui::MenuItem("Reset filter")) {
         SetFilter(m_viewController.GetMainFilter());
       }
-      ImGui::Separator();
-      RenderSetCateogries(*m_dataViewer);
     }
     ImGui::EndPopup();
   }
@@ -73,70 +73,102 @@ void ListTransactionsWindow::RenderMainView() {
   if (ImGui::BeginTable(
           std::format("ListTransactionsWnd id:{}", m_viewId).c_str(), 4,
           flags)) {
-    for (auto &transaction : transactions) {
+    for (auto transactionIt = transactions.crbegin();
+         transactionIt != transactions.crend(); ++transactionIt) {
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
-      ImGui::Text(UnixToStr(transaction.m_date).c_str());
+      ImGui::Text(UnixToStr(transactionIt->m_date).c_str());
       ImGui::TableNextColumn();
-      std::string descriptionRaw = transaction.m_desc;
+      std::string descriptionRaw = transactionIt->m_desc;
       if (m_limitDescLen && descriptionRaw.size() > m_maxLimitDescLen)
         descriptionRaw = std::format(
             "{}...", descriptionRaw.substr(0, m_maxLimitDescLen - 3));
       ImGui::Text(descriptionRaw.c_str());
       ImGui::TableNextColumn();
-      std::string rawValue = std::to_string(abs(transaction.m_value));
+      std::string rawValue = std::to_string(abs(transactionIt->m_value));
       std::string substrRawValue = rawValue.substr(0, rawValue.find('.') + 3);
       std::string formattedValue = std::format(
-          "{}{}", transaction.m_value < 0.0f ? "-" : "", substrRawValue);
+          "{}{}", transactionIt->m_value < 0.0f ? "-" : "", substrRawValue);
       ImGui::TextUnformatted(formattedValue.c_str());
       ImGui::TableNextColumn();
-      ImGui::Text(m_dataViewer->GetCategoryName(transaction.m_subCat).c_str());
+      ImGui::Text(
+          m_dataViewer->GetCategoryName(transactionIt->m_subCat).c_str());
     }
     ImGui::EndTable();
   }
 }
 
 void ListTransactionsWindow::RenderTaskbarExt() {
-  ImGui::Checkbox("Limit description length", &m_limitDescLen);
-  ImGui::Text("Set description length limit");
-  ImGui::SliderInt("##mylabel", (int *)&m_maxLimitDescLen, 0, 60, "%d");
+  // ImGui::Checkbox("Limit description length", &m_limitDescLen);
+  // ImGui::Text("Set description length limit");
+  // ImGui::SliderInt("##mylabel", (int *)&m_maxLimitDescLen, 0, 60, "%d");
 }
 
 void View::RenderSetCateogries(DBFilter &filter) {
-  ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
-  if (ImGui::Button("Select all")) {
-    filter.SetAllCategories();
-  }
-  ImGui::SameLine();
-  if (ImGui::Button("Deselect all")) {
-    filter.OmitAllCategories();
-  }
-
-  const std::vector<std::string> &catNames = filter.GetCategoryNames();
-  auto &catMappings = filter.GetCategoryMapping();
-
-  static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ScopeRect;
-  for (auto it = catMappings.cbegin(); it != catMappings.end(); ++it) {
-    ImGui::BeginMultiSelect(flags, 0, catMappings.size());
-    ImGui::SeparatorText(
-        std::format("Category: {}", catNames[it->first]).c_str());
-
-    for (size_t subCatId : it->second) {
-      std::string label = catNames[subCatId];
-      if (ImGui::Selectable(label.c_str(), filter.IsCategoryActive(subCatId))) {
-        if (filter.IsCategoryActive(subCatId)) {
-          if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
-            filter.SetCategoryState(subCatId, false);
-          }
-        } else {
-          filter.SetCategoryState(subCatId, true);
-        }
-      }
+  if (ImGui::BeginMenu("Set categories")) {
+    ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
+    if (ImGui::Button("Select all")) {
+      filter.SetAllCategories();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Deselect all")) {
+      filter.OmitAllCategories();
     }
 
-    ImGui::EndMultiSelect();
+    const std::vector<std::string> &catNames = filter.GetCategoryNames();
+    auto &catMappings = filter.GetCategoryMapping();
+
+    static ImGuiMultiSelectFlags flags = ImGuiMultiSelectFlags_ScopeRect;
+    for (auto it = catMappings.cbegin(); it != catMappings.end(); ++it) {
+      ImGui::BeginMultiSelect(flags, 0, static_cast<int>(catMappings.size()));
+      ImGui::SeparatorText(
+          std::format("Category: {}", catNames[it->first]).c_str());
+
+      for (size_t subCatId : it->second) {
+        // This is obv very shit
+        uint8_t u8subCatId = static_cast<uint8_t>(subCatId);
+        std::string label = catNames[subCatId];
+        if (ImGui::Selectable(label.c_str(),
+                              filter.IsCategoryActive(u8subCatId))) {
+          if (filter.IsCategoryActive(u8subCatId)) {
+            if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+              filter.SetCategoryState(u8subCatId, false);
+            }
+          } else {
+            filter.SetCategoryState(u8subCatId, true);
+          }
+        }
+      }
+
+      ImGui::EndMultiSelect();
+    }
+    ImGui::PopItemFlag();
+    ImGui::EndMenu();
   }
-  ImGui::PopItemFlag();
+}
+
+void View::RenderSetDate(DBFilter &filter) {
+  if (ImGui::BeginMenu("Set date range")) {
+
+    std::time_t startDate(filter.GetStartDate());
+    tm startDateTm;
+    gmtime_s(&startDateTm, &startDate); // fuck da err
+
+    std::time_t endDate(filter.GetEndDate());
+    tm endDateTm;
+    gmtime_s(&endDateTm, &endDate); // fuck da err
+
+    if (ImGui::DatePicker("Start date", startDateTm)) {
+      filter.SetStartDate(static_cast<uint32_t>(mktime(&startDateTm)) + 1);
+      filter.BuildCache();
+    }
+
+    if (ImGui::DatePicker("End date", endDateTm)) {
+      filter.SetEndDate(static_cast<uint32_t>(mktime(&endDateTm)) + 1);
+      filter.BuildCache();
+    }
+    ImGui::EndMenu();
+  }
 }
 
 std::string View::UnixToStr(uint32_t unixTime) {

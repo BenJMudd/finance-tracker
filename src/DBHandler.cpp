@@ -39,10 +39,14 @@ CategoryEntry::CategoryEntry(SQLite::Statement &res,
 
 TransactionEntry::TransactionEntry(SQLite::Statement &res,
                                    const std::vector<std::string> &catNames)
-    : m_date(res.getColumn(0).getInt()), m_desc(res.getColumn(1).getString()),
+    : m_date(res.getColumn(0).getInt() + 3601), m_desc(res.getColumn(1).getString()),
       m_value(res.getColumn(2).getDouble()) {
   std::string subcat = res.getColumn(3).getString();
   auto subcatIdIt = std::find(catNames.begin(), catNames.end(), subcat);
   assert(subcatIdIt != catNames.end());
   m_subCat = subcatIdIt - catNames.begin();
 }
+
+SingleValueEntry::SingleValueEntry(SQLite::Statement &res,
+                                   const std::vector<std::string> &catNames)
+    : m_val(res.getColumn(0).getInt()) {}

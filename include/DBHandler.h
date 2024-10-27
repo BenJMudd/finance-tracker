@@ -42,6 +42,15 @@ struct TransactionEntry {
   std::tuple_element_t<Index, TransactionEntry> &get();
 };
 
+// TODO: tempalte for different values
+struct SingleValueEntry {
+  SingleValueEntry() {}
+  SingleValueEntry(SQLite::Statement &res,
+                   const std::vector<std::string> &catNames);
+
+  uint32_t m_val;
+};
+
 template <std::size_t Index>
 inline std::tuple_element_t<Index, TransactionEntry> &TransactionEntry::get() {
   if constexpr (Index == 0)

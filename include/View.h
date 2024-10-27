@@ -15,6 +15,7 @@ public:
   virtual bool GetCacheValidity() = 0;
 
   static void RenderSetCateogries(DBFilter &filter);
+  static void RenderSetDate(DBFilter &filter);
 
 protected:
   std::string UnixToStr(uint32_t unixTime);

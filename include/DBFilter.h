@@ -13,41 +13,17 @@ public:
 
   DBFilter(DBHandler &db);
   ~DBFilter() { free(m_subcategoryState); }
-  void SetStartDate(uint32_t date) {
-    m_startDate = date;
-    m_cacheValid = false;
-  }
-  void SetEndDate(uint32_t date) {
-    m_endDate = date;
-    m_cacheValid = false;
-  }
+  void SetStartDate(uint32_t date);
+  void SetEndDate(uint32_t date);
 
-  void SetCategoryState(size_t subCatId, bool state) {
-    if (state) {
-      m_subcategoryState[subCatId / 8] |= (1 << subCatId % 8);
-    } else {
-      m_subcategoryState[subCatId / 8] &= ~(1 << subCatId % 8);
-    }
+  uint32_t GetStartDate() const { return m_startDate; }
+  uint32_t GetEndDate() const { return m_endDate; }
 
-    m_cacheValid = false;
-  }
+  void SetCategoryState(size_t subCatId, bool state);
+  void OmitAllCategories();
+  void SetAllCategories();
 
-  void OmitAllCategories() {
-    memset(m_subcategoryState, 0x0, (m_db.GetCategoryNames().size() / 8) + 1);
-    m_cacheValid = false;
-  }
-
-  void SetAllCategories() {
-    memset(m_subcategoryState, 0xff, (m_db.GetCategoryNames().size() / 8) + 1);
-    m_cacheValid = false;
-  }
-
-  void ClearFilter() {
-    memset(m_subcategoryState, 0xff, (m_db.GetCategoryNames().size() / 8) + 1);
-    m_startDate = std::nullopt;
-    m_endDate = std::nullopt;
-    m_cacheValid = false;
-  }
+  void ClearFilter();
 
   const std::vector<TransactionEntry> &GetTransactions(bool &isCacheValid);
   void BuildCache();
@@ -72,7 +48,7 @@ private:
   bool m_cacheValid;
 
   // Filters
-  std::optional<uint32_t> m_startDate;
-  std::optional<uint32_t> m_endDate;
+  uint32_t m_startDate;
+  uint32_t m_endDate;
   uint8_t *m_subcategoryState;
 };
