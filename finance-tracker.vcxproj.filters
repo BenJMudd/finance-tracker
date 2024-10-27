@@ -96,6 +96,9 @@
     <ClCompile Include="lib\imgui\ImGuiDatePicker.cpp">
       <Filter>lib\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="src\DataTransformer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\sqlite3.h">
@@ -190,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="lib\imgui\ImGuiDatePicker.hpp">
       <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DataTransformer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

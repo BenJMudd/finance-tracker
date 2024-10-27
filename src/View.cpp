@@ -64,7 +64,11 @@ void SingleFilterView::RenderTaskbar() {
 }
 
 void ListTransactionsWindow::RenderMainView() {
-  static ImGuiTableFlags flags =
+  auto &aggregateTransformer =
+      m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId);
+  std::string ret = aggregateTransformer.GetAggregate();
+
+  static constexpr ImGuiTableFlags flags =
       ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable |
       ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV |
       ImGuiTableFlags_ContextMenuInBody;

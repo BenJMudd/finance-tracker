@@ -160,6 +160,7 @@
     <ClCompile Include="lib\Statement.cpp" />
     <ClCompile Include="lib\Transaction.cpp" />
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\DataTransformer.cpp" />
     <ClCompile Include="src\DBFilter.cpp" />
     <ClCompile Include="src\DBHandler.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -168,6 +169,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\App.h" />
+    <ClInclude Include="include\DataTransformer.h" />
     <ClInclude Include="include\DBFilter.h" />
     <ClInclude Include="include\DBHandler.h" />
     <ClInclude Include="include\StateController.h" />
