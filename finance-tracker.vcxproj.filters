@@ -22,11 +22,23 @@
     <Filter Include="lib\imgui">
       <UniqueIdentifier>{6a2b3ade-3745-40a9-9f0a-6b3df085af91}</UniqueIdentifier>
     </Filter>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{d78559a9-bd70-4a25-8c3a-ad8885e7209d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="res\finances.db">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="scripts\auto_input_core.py">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\auto_input_ui.py">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="scripts\transaction-pairs.json">
+      <Filter>scripts</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

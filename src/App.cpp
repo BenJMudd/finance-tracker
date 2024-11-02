@@ -1,5 +1,6 @@
 #include "App.h"
 #include "imgui/imgui.h"
+#include <stdio.h>
 #include <time.h>
 
 App::App()
@@ -28,6 +29,9 @@ void App::RenderTitleBar() {
       View::RenderSetCateogries(*mainFilter);
       if (ImGui::MenuItem("Refresh all views")) {
         m_controller.GetViewController().RefreshViews();
+      }
+      if (ImGui::MenuItem("Input transactions")) {
+        InputData();
       }
       ImGui::EndMenu();
     }
@@ -92,4 +96,10 @@ void App::RenderViewWnd(std::optional<uint8_t> &viewHandle) {
   }
   View &view = m_controller.GetViewController().GetView<View>(*viewHandle);
   view.Render();
+}
+
+void App::InputData() {
+  system(std::format("py {}\\{}", StateController::DIRECTORY,
+                     StateController::INPUT_SCRIPT_PATH)
+             .c_str());
 }

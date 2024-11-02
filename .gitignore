@@ -401,3 +401,7 @@ FodyWeavers.xsd
 # finance-tracker specifics
 res/
 lib/
+
+imgui.ini
+scripts/
+transaction-pairs.json
