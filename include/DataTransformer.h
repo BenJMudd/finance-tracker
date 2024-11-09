@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -8,7 +9,9 @@ class DBFilter;
 class DataTransformer {
 public:
   DataTransformer() {}
-  virtual ~DataTransformer() {}
+  virtual ~DataTransformer() {
+    std::cout << "Data Transformer deleted" << std::endl;
+  }
   virtual void BuildCache() = 0;
 };
 
@@ -33,7 +36,7 @@ public:
 
   void BuildCache() override;
 
-  AggregateData &GetAggregate() { return m_cache; }
+  const AggregateData &GetAggregate() { return m_cache; }
 
 private:
   AggregateData m_cache;

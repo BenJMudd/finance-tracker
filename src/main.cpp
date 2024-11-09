@@ -61,8 +61,8 @@ void CleanupRenderTarget();
 void WaitForLastSubmittedFrame();
 FrameContext *WaitForNextFrameResources();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
-            int nShowCmd) {
+
+int main() {
 
   // Create application window
   // ImGui_ImplWin32_EnableDpiAwareness();
@@ -516,4 +516,8 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     return 0;
   }
   return ::DefWindowProcW(hWnd, msg, wParam, lParam);
+}
+int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine,
+            int nShowCmd) {
+  main();
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "DBHandler.h"
 #include "DataTransformer.h"
+#include <iostream>
 #include <optional>
 #include <set>
 #include <string>
@@ -13,7 +14,10 @@ public:
   using SPtr = std::shared_ptr<DBFilter>;
 
   DBFilter(DBHandler &db);
-  ~DBFilter() { free(m_subcategoryState); }
+  ~DBFilter() {
+    free(m_subcategoryState);
+    std::cout << "DBFilter deleted" << std::endl;
+  }
   void SetStartDate(uint32_t date);
   void SetEndDate(uint32_t date);
 
@@ -45,9 +49,10 @@ public:
   // TODO: Multi filter transformers
   template <typename T> T &GetDataTansformer(uint8_t viewId);
   // TODO: implement
-  void NotifyViewDestroyed();
+  void NotifyViewDropped(uint8_t viewId);
 
 private:
+  void DropTransformer(uint8_t viewId, DataTransformer *trans);
   DBHandler &m_db;
 
   // cached results
@@ -61,14 +66,15 @@ private:
 
   // Data transformers
   // view id -> data filters they are using
-  std::unordered_map<uint8_t, std::vector<DataTransformer *>> m_transUsers;
+  std::unordered_map<uint8_t, std::set<DataTransformer *>> m_viewTransMap;
+  std::unordered_map<DataTransformer *, std::set<uint8_t>> m_transViewMap;
   // TODO: this will be shared ptr for multi filter transformers
   std::vector<std::unique_ptr<DataTransformer>> m_transformers;
 };
 
 template <typename T> inline T &DBFilter::GetDataTansformer(uint8_t viewId) {
-  auto viewDepsIt = m_transUsers.find(viewId);
-  if (viewDepsIt != m_transUsers.end()) {
+  auto viewDepsIt = m_viewTransMap.find(viewId);
+  if (viewDepsIt != m_viewTransMap.end()) {
     for (auto *transformer : viewDepsIt->second) {
       if (auto *toFind = dynamic_cast<T *>(transformer)) {
         return *toFind;
@@ -79,9 +85,11 @@ template <typename T> inline T &DBFilter::GetDataTansformer(uint8_t viewId) {
     assert(false);
   }
 
+  // Find existing transformer
   for (auto &transformer : m_transformers) {
     if (auto *toFind = dynamic_cast<T *>(transformer.get())) {
-      m_transUsers[viewId].emplace_back(toFind);
+      m_viewTransMap[viewId].insert(toFind);
+      m_transViewMap[toFind].insert(viewId);
       return *toFind;
     }
   }
@@ -90,7 +98,8 @@ template <typename T> inline T &DBFilter::GetDataTansformer(uint8_t viewId) {
   T *pTransformer = transformer.get();
   m_transformers.push_back(std::move(transformer));
 
-  m_transUsers[viewId].emplace_back(pTransformer);
+  m_viewTransMap[viewId].insert(pTransformer);
+  m_transViewMap[pTransformer].insert(viewId);
   if (m_cacheValid)
     pTransformer->BuildCache();
 

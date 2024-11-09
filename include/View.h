@@ -20,6 +20,8 @@ public:
 protected:
   std::string UnixToStr(uint32_t unixTime);
 
+  std::string FormatTransaction(double val);
+
   uint8_t m_viewId;
   ViewController &m_viewController;
 };
@@ -36,7 +38,11 @@ public:
   virtual void RenderTaskbarExt() = 0;
 
   virtual DBFilter &GetFilter() { return *m_dataViewer.get(); }
-  virtual void SetFilter(DBFilter::SPtr filter) { m_dataViewer = filter; }
+  virtual void SetFilter(DBFilter::SPtr filter) {
+    m_dataViewer->NotifyViewDropped(m_viewId);
+    m_dataViewer = filter;
+  }
+
   virtual bool GetCacheValidity() override {
     return m_dataViewer->IsCacheValid();
   }
@@ -86,9 +92,7 @@ class AggregateByCategoryView : public SingleFilterView {
 public:
   AggregateByCategoryView(uint8_t viewId, ViewController &viewController,
                           DBFilter::SPtr filter)
-      : m_aggregateTransformer(
-            filter->GetDataTansformer<AggregateTransformer>(viewId)),
-        SingleFilterView(viewId, viewController, filter) {}
+      : SingleFilterView(viewId, viewController, filter) {}
 
   std::string GetViewName() override { return "Transactions By Category"; }
   void RenderMainView() override;
@@ -96,6 +100,4 @@ public:
 
 private:
   using AggregateData = AggregateTransformer::AggregateData;
-
-  AggregateTransformer &m_aggregateTransformer;
 };

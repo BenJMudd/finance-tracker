@@ -88,11 +88,7 @@ void ListTransactionsWindow::RenderMainView() {
             "{}...", descriptionRaw.substr(0, m_maxLimitDescLen - 3));
       ImGui::Text(descriptionRaw.c_str());
       ImGui::TableNextColumn();
-      std::string rawValue = std::to_string(abs(transactionIt->m_value));
-      std::string substrRawValue = rawValue.substr(0, rawValue.find('.') + 3);
-      std::string formattedValue = std::format(
-          "{}{}", transactionIt->m_value < 0.0f ? "-" : "", substrRawValue);
-      ImGui::TextUnformatted(formattedValue.c_str());
+      ImGui::TextUnformatted(FormatTransaction(transactionIt->m_value).c_str());
       ImGui::TableNextColumn();
       ImGui::Text(
           m_dataViewer->GetCategoryName(transactionIt->m_subCat).c_str());
@@ -183,9 +179,31 @@ std::string View::UnixToStr(uint32_t unixTime) {
   return ss.str();
 }
 
+std::string View::FormatTransaction(double val) {
+  std::string rawValue = std::to_string(abs(val));
+  std::string substrRawValue = rawValue.substr(0, rawValue.find('.') + 3);
+  std::string formattedValue =
+      std::format("{}{}", val < 0.0f ? "-" : "", substrRawValue);
+  return formattedValue;
+}
+
 void AggregateByCategoryView::RenderMainView() {
-  AggregateData data = m_aggregateTransformer.GetAggregate();
-  int hold = 2;
+  AggregateTransformer &transformer =
+      m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId);
+  const AggregateData &data = transformer.GetAggregate();
+  auto &catNames = m_dataViewer->GetCategoryNames();
+  for (const auto &[catId, catTransactionData] : data) {
+    ImGui::PushID(catId);
+    if (ImGui::TreeNode("", "%s: %s", catNames[catId].c_str(),
+                        FormatTransaction(catTransactionData.first).c_str())) {
+      for (const auto &[subCat, value] : catTransactionData.second) {
+        ImGui::Text("%s: %s", catNames[subCat].c_str(),
+                    FormatTransaction(value).c_str());
+      }
+      ImGui::TreePop();
+    }
+    ImGui::PopID();
+  }
 }
 
 void AggregateByCategoryView::RenderTaskbarExt() {}

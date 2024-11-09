@@ -61,6 +61,44 @@ std::string DBFilter::GetCategoryName(size_t id) {
   return m_db.GetCategoryNames()[id];
 }
 
+void DBFilter::NotifyViewDropped(uint8_t viewId) {
+  // remove unused filters
+  std::set<DataTransformer *> viewHeldTransformers = m_viewTransMap[viewId];
+  for (DataTransformer *transformer : viewHeldTransformers) {
+    DropTransformer(viewId, transformer);
+  }
+}
+
+void DBFilter::DropTransformer(uint8_t viewId, DataTransformer *trans) {
+  std::set<DataTransformer *> &viewHeldTransformers = m_viewTransMap[viewId];
+  auto heldTransIt = std::find(viewHeldTransformers.begin(),
+                               viewHeldTransformers.end(), trans);
+  assert(heldTransIt != viewHeldTransformers.end());
+  viewHeldTransformers.erase(heldTransIt);
+
+  if (viewHeldTransformers.empty())
+    m_viewTransMap.erase(viewId);
+
+  std::set<uint8_t> &transViews = m_transViewMap[trans];
+  auto heldTransViewIt =
+      std::find(transViews.begin(), transViews.end(), viewId);
+  assert(heldTransViewIt != transViews.end());
+  transViews.erase(heldTransViewIt);
+
+  if (transViews.empty()) {
+    m_transViewMap.erase(trans);
+
+    // no one is holding the transformer, should be destroyed
+    auto transToRemoveIt =
+        std::find_if(m_transformers.begin(), m_transformers.end(),
+                     [&](const std::unique_ptr<DataTransformer> &transformer) {
+                       return transformer.get() == trans;
+                     });
+    assert(transToRemoveIt != m_transformers.end());
+    m_transformers.erase(transToRemoveIt);
+  }
+}
+
 const std::vector<TransactionEntry> &
 DBFilter::GetTransactions(bool *isCacheValid) {
   if (isCacheValid)
