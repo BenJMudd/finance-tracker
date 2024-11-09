@@ -26,10 +26,11 @@ public:
 
   void ClearFilter();
 
-  const std::vector<TransactionEntry> &GetTransactions(bool &isCacheValid);
+  const std::vector<TransactionEntry> &
+  GetTransactions(bool *isCacheValid = nullptr);
   void BuildCache();
   void InvalidateCache() { m_cacheValid = false; }
-  bool IsCacheValid() { return m_cacheValid; }
+  bool IsCacheValid() const { return m_cacheValid; }
   bool IsCategoryActive(uint8_t id) {
     return m_subcategoryState[id / 8] & (1 << (id % 8));
   }
@@ -66,7 +67,6 @@ private:
 };
 
 template <typename T> inline T &DBFilter::GetDataTansformer(uint8_t viewId) {
-  // TODO: insert return statement here
   auto viewDepsIt = m_transUsers.find(viewId);
   if (viewDepsIt != m_transUsers.end()) {
     for (auto *transformer : viewDepsIt->second) {
@@ -91,5 +91,8 @@ template <typename T> inline T &DBFilter::GetDataTansformer(uint8_t viewId) {
   m_transformers.push_back(std::move(transformer));
 
   m_transUsers[viewId].emplace_back(pTransformer);
+  if (m_cacheValid)
+    pTransformer->BuildCache();
+
   return *pTransformer;
 }

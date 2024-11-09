@@ -48,7 +48,6 @@ void SingleFilterView::RenderTaskbar() {
     RenderSetDate(*m_dataViewer);
     RenderSetCateogries(*m_dataViewer);
     if (m_dataViewer == m_viewController.GetMainFilter()) {
-
       if (ImGui::MenuItem("Create new filter")) {
         DBFilter::SPtr newFilter = m_viewController.CreateFilter();
         SetFilter(newFilter);
@@ -64,16 +63,16 @@ void SingleFilterView::RenderTaskbar() {
 }
 
 void ListTransactionsWindow::RenderMainView() {
-  auto &aggregateTransformer =
-      m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId);
-  std::string ret = aggregateTransformer.GetAggregate();
+  // auto &aggregateTransformer =
+  //     m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId);
+  //// std::string ret = aggregateTransformer.GetAggregate();
 
   static constexpr ImGuiTableFlags flags =
       ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable |
       ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV |
       ImGuiTableFlags_ContextMenuInBody;
   bool isCacheValid = false;
-  auto &transactions = m_dataViewer->GetTransactions(isCacheValid);
+  auto &transactions = m_dataViewer->GetTransactions(&isCacheValid);
   if (ImGui::BeginTable(
           std::format("ListTransactionsWnd id:{}", m_viewId).c_str(), 4,
           flags)) {
@@ -183,3 +182,10 @@ std::string View::UnixToStr(uint32_t unixTime) {
   ss << std::put_time(&t, "%d-%m-%y");
   return ss.str();
 }
+
+void AggregateByCategoryView::RenderMainView() {
+  AggregateData data = m_aggregateTransformer.GetAggregate();
+  int hold = 2;
+}
+
+void AggregateByCategoryView::RenderTaskbarExt() {}

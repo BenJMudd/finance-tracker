@@ -90,6 +90,15 @@ void App::RenderViewWnd(std::optional<uint8_t> &viewHandle) {
             .GetView<ListTransactionsWindow>(*viewHandle)
             .Refresh();
       }
+
+      if (ImGui::MenuItem("Transactions by category")) {
+        viewHandle = m_controller.GetViewController()
+                         .CreateView<AggregateByCategoryView>(
+                             m_controller.GetViewController().GetMainFilter());
+        m_controller.GetViewController()
+            .GetView<AggregateByCategoryView>(*viewHandle)
+            .Refresh();
+      }
       ImGui::EndMenu();
     }
     return;

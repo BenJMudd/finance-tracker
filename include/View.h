@@ -81,3 +81,21 @@ private:
   size_t m_maxLimitDescLen;
   bool m_limitDescLen;
 };
+
+class AggregateByCategoryView : public SingleFilterView {
+public:
+  AggregateByCategoryView(uint8_t viewId, ViewController &viewController,
+                          DBFilter::SPtr filter)
+      : m_aggregateTransformer(
+            filter->GetDataTansformer<AggregateTransformer>(viewId)),
+        SingleFilterView(viewId, viewController, filter) {}
+
+  std::string GetViewName() override { return "Transactions By Category"; }
+  void RenderMainView() override;
+  void RenderTaskbarExt() override;
+
+private:
+  using AggregateData = AggregateTransformer::AggregateData;
+
+  AggregateTransformer &m_aggregateTransformer;
+};

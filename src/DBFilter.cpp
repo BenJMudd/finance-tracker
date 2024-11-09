@@ -62,8 +62,10 @@ std::string DBFilter::GetCategoryName(size_t id) {
 }
 
 const std::vector<TransactionEntry> &
-DBFilter::GetTransactions(bool &isCacheValid) {
-  isCacheValid = m_cacheValid;
+DBFilter::GetTransactions(bool *isCacheValid) {
+  if (isCacheValid)
+    *isCacheValid = m_cacheValid;
+
   return m_transactions;
 }
 
@@ -91,5 +93,11 @@ void DBFilter::BuildCache() {
       std::format("select * from transactions where {} one > {} and one < {}",
                   catFilter, m_startDate, m_endDate);
   m_transactions = m_db.ExecuteQuery<TransactionEntry>(query);
+
+  // update cache for data transformers
+  for (auto &transformer : m_transformers) {
+    transformer->BuildCache();
+  }
+
   m_cacheValid = true;
 }
