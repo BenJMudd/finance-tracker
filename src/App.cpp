@@ -1,18 +1,24 @@
 #include "App.h"
 #include "imgui/imgui.h"
+#include "imgui/implot.h"
 #include <stdio.h>
 #include <time.h>
 
 App::App()
-    : m_demoWindowOpen(false),
+    : m_demoWindowOpen(false), m_plotDemoOpen(false),
       m_mainViewFilters(m_controller.GetDB().GetCategoryNames().size(), true) {
   ImGui::GetIO().WantCaptureKeyboard = true;
 }
 
 void App::Render() {
   RenderTitleBar();
-  if (m_demoWindowOpen)
+  if (m_demoWindowOpen) {
     ImGui::ShowDemoWindow(&m_demoWindowOpen);
+  }
+
+  if (m_plotDemoOpen) {
+    ImPlot::ShowDemoWindow(&m_plotDemoOpen);
+  }
 
   RenderMainView();
 }
@@ -23,10 +29,13 @@ void App::RenderTitleBar() {
       if (ImGui::MenuItem("Render demo window")) {
         m_demoWindowOpen = true;
       }
+      if (ImGui::MenuItem("Render plot demo window")) {
+        m_plotDemoOpen = true;
+      }
       DBFilter::SPtr &mainFilter =
           m_controller.GetViewController().GetMainFilter();
-      View::RenderSetDate(*mainFilter);
-      View::RenderSetCateogries(*mainFilter);
+      ViewRendering::RenderSetDate(*mainFilter);
+      ViewRendering::RenderSetCateogries(*mainFilter);
       if (ImGui::MenuItem("Refresh all views")) {
         m_controller.GetViewController().RefreshViews();
       }
@@ -82,27 +91,17 @@ void App::RenderMainView() {
 void App::RenderViewWnd(std::optional<uint8_t> &viewHandle) {
   if (!viewHandle.has_value()) {
     if (ImGui::BeginMenu("Add view")) {
-      if (ImGui::MenuItem("Transactions list")) {
-        viewHandle =
-            m_controller.GetViewController().CreateView<ListTransactionsWindow>(
-                m_controller.GetViewController().GetMainFilter());
-        m_controller.GetViewController()
-            .GetView<ListTransactionsWindow>(*viewHandle)
-            .Refresh();
-      }
-
-      if (ImGui::MenuItem("Transactions by category")) {
-        viewHandle = m_controller.GetViewController()
-                         .CreateView<AggregateByCategoryView>(
-                             m_controller.GetViewController().GetMainFilter());
-        m_controller.GetViewController()
-            .GetView<AggregateByCategoryView>(*viewHandle)
-            .Refresh();
+      uint8_t viewId;
+      if (ViewRendering::RenderCreateView(
+              m_controller.GetViewController(),
+              m_controller.GetViewController().GetMainFilter(), viewId)) {
+        viewHandle = viewId;
       }
       ImGui::EndMenu();
     }
     return;
   }
+
   View &view = m_controller.GetViewController().GetView<View>(*viewHandle);
   view.Render();
 }

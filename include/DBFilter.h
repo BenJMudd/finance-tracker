@@ -48,7 +48,7 @@ public:
 
   // TODO: Multi filter transformers
   template <typename T> T &GetDataTansformer(uint8_t viewId);
-  // TODO: implement
+
   void NotifyViewDropped(uint8_t viewId);
 
 private:

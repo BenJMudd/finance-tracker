@@ -158,6 +158,9 @@
     <ClCompile Include="lib\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="lib\imgui\implot.cpp" />
+    <ClCompile Include="lib\imgui\implot_demo.cpp" />
+    <ClCompile Include="lib\imgui\implot_items.cpp" />
     <ClCompile Include="lib\Savepoint.cpp" />
     <ClCompile Include="lib\sqlite3.c" />
     <ClCompile Include="lib\Statement.cpp" />
@@ -184,6 +187,8 @@
     <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
     <ClInclude Include="lib\imgui\imgui_impl_win32.h" />
     <ClInclude Include="lib\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\imgui\implot.h" />
+    <ClInclude Include="lib\imgui\implot_internal.h" />
     <ClInclude Include="lib\imgui\imstb_rectpack.h" />
     <ClInclude Include="lib\imgui\imstb_textedit.h" />
     <ClInclude Include="lib\imgui\imstb_truetype.h" />

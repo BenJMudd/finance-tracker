@@ -26,6 +26,7 @@
 
 #include "App.h"
 #include "imgui/imgui_internal.h"
+#include "imgui/implot.h"
 
 struct FrameContext {
   ID3D12CommandAllocator *CommandAllocator;
@@ -97,6 +98,7 @@ int main() {
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  ImPlot::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
   (void)io;
   io.ConfigFlags |=
@@ -228,6 +230,7 @@ int main() {
   // Cleanup
   ImGui_ImplDX12_Shutdown();
   ImGui_ImplWin32_Shutdown();
+  ImPlot::DestroyContext();
   ImGui::DestroyContext();
 
   CleanupDeviceD3D();

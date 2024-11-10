@@ -22,5 +22,6 @@ private:
   std::map<uint8_t, std::pair<std::vector<bool>, DBFilter *>>
       m_viewsWithCustomFilters;
   bool m_demoWindowOpen;
+  bool m_plotDemoOpen;
   std::vector<bool> m_mainViewFilters;
 };

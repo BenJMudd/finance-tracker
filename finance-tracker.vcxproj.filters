@@ -111,6 +111,15 @@
     <ClCompile Include="src\DataTransformer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lib\imgui\implot.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\implot_demo.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="lib\imgui\implot_items.cpp">
+      <Filter>lib\imgui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\sqlite3.h">
@@ -208,6 +217,12 @@
     </ClInclude>
     <ClInclude Include="include\DataTransformer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\implot.h">
+      <Filter>lib\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\imgui\implot_internal.h">
+      <Filter>lib\imgui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

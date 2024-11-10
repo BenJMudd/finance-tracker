@@ -2,6 +2,7 @@
 #include "ViewController.h"
 #include "imgui/ImGuiDatePicker.hpp"
 #include "imgui/imgui.h"
+#include "imgui/implot.h"
 #include <Windows.h>
 #include <time.h>
 
@@ -31,7 +32,7 @@ void SingleFilterView::RenderTaskbar() {
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_colButtonSepFilterActive);
   }
 
-  std::string viewName = GetViewName();
+  std::string_view viewName = GetViewName();
   if (ImGui::Button(
           std::format("{} (Click to open settings)", viewName).c_str(),
           ImVec2(ImGui::GetContentRegionAvail().x, 0))) {
@@ -45,10 +46,11 @@ void SingleFilterView::RenderTaskbar() {
     if (ImGui::MenuItem("refresh view")) {
       Refresh();
     }
-    RenderSetDate(*m_dataViewer);
-    RenderSetCateogries(*m_dataViewer);
+    ViewRendering::RenderSetDate(*m_dataViewer);
+    ViewRendering::RenderSetCateogries(*m_dataViewer);
     if (m_dataViewer == m_viewController.GetMainFilter()) {
       if (ImGui::MenuItem("Create new filter")) {
+        // TODO: need to think about the transformers
         DBFilter::SPtr newFilter = m_viewController.CreateFilter();
         SetFilter(newFilter);
         newFilter->BuildCache();
@@ -63,10 +65,6 @@ void SingleFilterView::RenderTaskbar() {
 }
 
 void ListTransactionsWindow::RenderMainView() {
-  // auto &aggregateTransformer =
-  //     m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId);
-  //// std::string ret = aggregateTransformer.GetAggregate();
-
   static constexpr ImGuiTableFlags flags =
       ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_Resizable |
       ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV |
@@ -97,13 +95,7 @@ void ListTransactionsWindow::RenderMainView() {
   }
 }
 
-void ListTransactionsWindow::RenderTaskbarExt() {
-  // ImGui::Checkbox("Limit description length", &m_limitDescLen);
-  // ImGui::Text("Set description length limit");
-  // ImGui::SliderInt("##mylabel", (int *)&m_maxLimitDescLen, 0, 60, "%d");
-}
-
-void View::RenderSetCateogries(DBFilter &filter) {
+void ViewRendering::RenderSetCateogries(DBFilter &filter) {
   if (ImGui::BeginMenu("Set categories")) {
     ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
     if (ImGui::Button("Select all")) {
@@ -146,7 +138,7 @@ void View::RenderSetCateogries(DBFilter &filter) {
   }
 }
 
-void View::RenderSetDate(DBFilter &filter) {
+void ViewRendering::RenderSetDate(DBFilter &filter) {
   if (ImGui::BeginMenu("Set date range")) {
 
     std::time_t startDate(filter.GetStartDate());
@@ -170,6 +162,42 @@ void View::RenderSetDate(DBFilter &filter) {
   }
 }
 
+const std::map<ViewRendering::types, std::string_view>
+    ViewRendering::VIEW_NAMES = {
+        {types::list_transaction, ListTransactionsWindow::VIEW_NAME},
+        {types::aggregate_cat, AggregateByCategoryView::VIEW_NAME},
+        {types::transaction_value_graph, AggregateGraph::VIEW_NAME},
+};
+
+bool ViewRendering::RenderCreateView(ViewController &controller,
+                                     DBFilter::SPtr filter, uint8_t &viewId) {
+  for (const auto &[type, name] : VIEW_NAMES) {
+    if (ImGui::MenuItem(name.data())) {
+      viewId = CreateView(controller, filter, type);
+      controller.GetView<View>(viewId).Refresh();
+      return true;
+    }
+  }
+
+  return false;
+}
+
+uint8_t ViewRendering::CreateView(ViewController &controller,
+                                  DBFilter::SPtr filter, types viewType) {
+  switch (viewType) {
+  case ViewRendering::types::list_transaction:
+    return controller.CreateView<ListTransactionsWindow>(filter);
+  case ViewRendering::types::aggregate_cat:
+    return controller.CreateView<AggregateByCategoryView>(filter);
+  case ViewRendering::types::transaction_value_graph:
+    return controller.CreateView<AggregateGraph>(filter);
+  default:
+    break;
+  }
+
+  return 0;
+}
+
 std::string View::UnixToStr(uint32_t unixTime) {
   std::time_t temp = unixTime;
   std::tm t;
@@ -190,20 +218,58 @@ std::string View::FormatTransaction(double val) {
 void AggregateByCategoryView::RenderMainView() {
   AggregateTransformer &transformer =
       m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId);
-  const AggregateData &data = transformer.GetAggregate();
+  const Aggregate &aggregate = transformer.GetAggregate();
   auto &catNames = m_dataViewer->GetCategoryNames();
-  for (const auto &[catId, catTransactionData] : data) {
-    ImGui::PushID(catId);
-    if (ImGui::TreeNode("", "%s: %s", catNames[catId].c_str(),
+  ImGui::Text("Total: %s", FormatTransaction(aggregate.m_total).c_str());
+  for (const auto &[catId, catTransactionData] : aggregate.m_data) {
+    if (ImGui::TreeNode(std::to_string(catId).c_str(), "%s: %s",
+                        catNames[catId].c_str(),
                         FormatTransaction(catTransactionData.first).c_str())) {
+
       for (const auto &[subCat, value] : catTransactionData.second) {
         ImGui::Text("%s: %s", catNames[subCat].c_str(),
                     FormatTransaction(value).c_str());
       }
       ImGui::TreePop();
     }
-    ImGui::PopID();
+
+    if (ImGui::BeginPopupContextItem(std::to_string(catId).c_str())) {
+      ImGui::Text("This a popup for %s!", catNames[catId].c_str());
+      if (ImGui::Button("Close"))
+        ImGui::CloseCurrentPopup();
+      ImGui::EndPopup();
+    }
   }
 }
 
 void AggregateByCategoryView::RenderTaskbarExt() {}
+
+void AggregateGraph::RenderMainView() {
+  const std::vector<AggregateTransformer::Aggregate> *rawData =
+      m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId)
+          .GetAggregateByInterval();
+
+  assert(rawData);
+
+  std::vector<double> xAxisDate;
+  xAxisDate.reserve(rawData->size());
+
+  std::vector<double> yAxisTotal;
+  yAxisTotal.reserve(rawData->size());
+
+  for (const auto &aggregateEntry : *rawData) {
+    xAxisDate.emplace_back(aggregateEntry.m_startDate);
+    yAxisTotal.emplace_back(-aggregateEntry.m_total);
+  }
+
+  static constexpr ImPlotAxisFlags yFlags = ImPlotAxisFlags_AutoFit;
+
+  if (ImPlot::BeginPlot("Stock Prices")) {
+    ImPlot::SetupAxes("Days", "Price", 0, yFlags);
+    ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Time);
+    ImPlot::SetupAxesLimits(*xAxisDate.begin(), xAxisDate.back(), -2000, 2000);
+    ImPlot::PlotLine("Total", xAxisDate.data(), yAxisTotal.data(),
+                     rawData->size());
+    ImPlot::EndPlot();
+  }
+}

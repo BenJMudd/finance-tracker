@@ -6,6 +6,21 @@
 
 class ViewController;
 
+class ViewRendering {
+public:
+  enum class types { list_transaction, aggregate_cat, transaction_value_graph };
+  static void RenderSetCateogries(DBFilter &filter);
+  static void RenderSetDate(DBFilter &filter);
+  static bool RenderCreateView(ViewController &controller,
+                               DBFilter::SPtr filter, uint8_t &viewId);
+
+  static const std::map<types, std::string_view> VIEW_NAMES;
+
+private:
+  static uint8_t CreateView(ViewController &controller, DBFilter::SPtr filter,
+                            types viewType);
+}; // namespace ViewRendering
+
 class View {
 public:
   View(uint8_t viewId, ViewController &viewController)
@@ -14,12 +29,8 @@ public:
   virtual void Render() = 0;
   virtual bool GetCacheValidity() = 0;
 
-  static void RenderSetCateogries(DBFilter &filter);
-  static void RenderSetDate(DBFilter &filter);
-
 protected:
   std::string UnixToStr(uint32_t unixTime);
-
   std::string FormatTransaction(double val);
 
   uint8_t m_viewId;
@@ -31,22 +42,20 @@ public:
   SingleFilterView(uint8_t viewId, ViewController &viewController,
                    DBFilter::SPtr dataViewer)
       : m_dataViewer(dataViewer), View(viewId, viewController) {}
-  virtual void Refresh() { m_dataViewer->BuildCache(); }
-  virtual void Render() override;
+  void Refresh() override { m_dataViewer->BuildCache(); }
+  void Render() override;
   virtual void RenderMainView() = 0;
   void RenderTaskbar();
   virtual void RenderTaskbarExt() = 0;
 
-  virtual DBFilter &GetFilter() { return *m_dataViewer.get(); }
+  DBFilter &GetFilter() { return *m_dataViewer.get(); }
   virtual void SetFilter(DBFilter::SPtr filter) {
     m_dataViewer->NotifyViewDropped(m_viewId);
     m_dataViewer = filter;
   }
 
-  virtual bool GetCacheValidity() override {
-    return m_dataViewer->IsCacheValid();
-  }
-  virtual std::string GetViewName() = 0;
+  bool GetCacheValidity() override { return m_dataViewer->IsCacheValid(); }
+  virtual std::string_view GetViewName() = 0;
 
 protected:
   DBFilter::SPtr m_dataViewer;
@@ -79,9 +88,11 @@ public:
       : m_limitDescLen(true), m_maxLimitDescLen(40),
         SingleFilterView(viewId, viewController, filter) {}
 
-  std::string GetViewName() override { return "List transactions view"; }
+  static constexpr std::string_view VIEW_NAME = "Transactions list";
+  std::string_view GetViewName() override { return VIEW_NAME; }
+
   void RenderMainView() override;
-  void RenderTaskbarExt() override;
+  void RenderTaskbarExt() override{};
 
 private:
   size_t m_maxLimitDescLen;
@@ -94,10 +105,41 @@ public:
                           DBFilter::SPtr filter)
       : SingleFilterView(viewId, viewController, filter) {}
 
-  std::string GetViewName() override { return "Transactions By Category"; }
+  static constexpr std::string_view VIEW_NAME = "Transactions By Category";
+  std::string_view GetViewName() override { return VIEW_NAME; }
   void RenderMainView() override;
   void RenderTaskbarExt() override;
 
 private:
-  using AggregateData = AggregateTransformer::AggregateData;
+  using Aggregate = AggregateTransformer::Aggregate;
+};
+
+class AggregateGraph : public SingleFilterView {
+public:
+  AggregateGraph(uint8_t viewId, ViewController &viewController,
+                 DBFilter::SPtr filter)
+      : SingleFilterView(viewId, viewController, filter) {
+    // Set request for interval data
+    m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId)
+        .SetBuildByInterval(true);
+  }
+
+  ~AggregateGraph() {
+    m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId)
+        .SetBuildByInterval(false);
+  }
+
+  virtual void SetFilter(DBFilter::SPtr filter) {
+    SingleFilterView::SetFilter(filter);
+    m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId)
+        .SetBuildByInterval(true);
+  }
+
+  static constexpr std::string_view VIEW_NAME = "Transactions value graph";
+  std::string_view GetViewName() override { return VIEW_NAME; }
+  void RenderMainView() override;
+  void RenderTaskbarExt() override{};
+
+private:
+  using Aggregate = AggregateTransformer::Aggregate;
 };

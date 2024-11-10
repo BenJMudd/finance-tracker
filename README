@@ -1,5 +1,6 @@
-requires sqlite3 sqlitecpp v3.3.2 ImGui ImGuiDatePicker
+requires sqlite3 sqlitecpp v3.3.2 ImGui ImGuiDatePicker ImPlot
 https://www.sqlite.org/index.html
 https://github.com/SRombauts/SQLiteCpp
 https://github.com/ocornut/imgui
 https://github.com/DnA-IntRicate/ImGuiDatePicker
+https://github.com/epezent/implot
