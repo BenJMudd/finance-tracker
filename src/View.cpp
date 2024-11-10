@@ -251,15 +251,41 @@ void AggregateGraph::RenderMainView() {
 
   assert(rawData);
 
+  // TODO: this procs when only a single date is present
+  if (rawData->empty())
+    return;
+
+  const auto &aggregateRaw =
+      m_dataViewer->GetDataTansformer<AggregateTransformer>(m_viewId)
+          .GetAggregate();
+
   std::vector<double> xAxisDate;
   xAxisDate.reserve(rawData->size());
 
   std::vector<double> yAxisTotal;
   yAxisTotal.reserve(rawData->size());
 
+  std::vector<std::pair<size_t, std::vector<double>>> yAxisCategoryTotals;
+  yAxisCategoryTotals.reserve(rawData->size());
+
+  for (const auto &[catId, aggCatInfo] : aggregateRaw.m_data) {
+    yAxisCategoryTotals.emplace_back(catId, std::vector<double>());
+  }
+
   for (const auto &aggregateEntry : *rawData) {
     xAxisDate.emplace_back(aggregateEntry.m_startDate);
     yAxisTotal.emplace_back(-aggregateEntry.m_total);
+
+    size_t i = 0;
+    for (const auto &[catId, aggCatInfo] : aggregateRaw.m_data) {
+      auto catTotalIt = aggregateEntry.m_data.find(catId);
+      if (catTotalIt == aggregateEntry.m_data.end()) {
+        yAxisCategoryTotals[i].second.push_back(0.0);
+      } else {
+        yAxisCategoryTotals[i].second.push_back(-catTotalIt->second.first);
+      }
+      ++i;
+    }
   }
 
   static constexpr ImPlotAxisFlags yFlags = ImPlotAxisFlags_AutoFit;
@@ -270,6 +296,10 @@ void AggregateGraph::RenderMainView() {
     ImPlot::SetupAxesLimits(*xAxisDate.begin(), xAxisDate.back(), -2000, 2000);
     ImPlot::PlotLine("Total", xAxisDate.data(), yAxisTotal.data(),
                      rawData->size());
+    for (const auto &[catId, catTotal] : yAxisCategoryTotals) {
+      ImPlot::PlotLine(m_dataViewer->GetCategoryName(catId).c_str(),
+                       xAxisDate.data(), catTotal.data(), rawData->size());
+    }
     ImPlot::EndPlot();
   }
 }
